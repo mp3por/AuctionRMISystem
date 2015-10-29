@@ -1,8 +1,6 @@
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by vbk20 on 29/10/2015.
@@ -10,10 +8,12 @@ import java.util.List;
 public class Auction extends UnicastRemoteObject implements IAuctionRemote {
 
     List<IAuctionItem> auctionItems;
+    Map<Long,IAuctionItem> auctionItemsMap;
 
     public Auction() throws RemoteException {
         super();
         auctionItems = new ArrayList<IAuctionItem>();
+        auctionItemsMap = new HashMap<Long,IAuctionItem>();
         System.out.format("Creating server object\n");
     }
 
@@ -29,19 +29,21 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     }
 
     @Override
-    public IAuctionItem createAuctionItem(String itemName, double value, Date closingDate) throws RemoteException {
-        return new ActionItem(itemName,value, closingDate);
-    }
-
-    @Override
-    public void createAndRegisterAuctionItem(String itemName, double value, Date closingDate) throws RemoteException {
-        ActionItem i = new ActionItem(itemName,value,closingDate);
+    public long createAndRegisterAuctionItem(long creatorId,String itemName, double value, Date closingDate) throws RemoteException {
+        ActionItem i = new ActionItem(creatorId,itemName,value,closingDate);
         registerAuctionItem(i);
+        return i.getId();
     }
 
     @Override
     public void registerAuctionItem(IAuctionItem item) {
+        auctionItemsMap.put(item.getId(),item);
         auctionItems.add(item);
+    }
+
+    @Override
+    public void bidForItem(long itemId, double bidValue) throws RemoteException {
+
     }
 
 
