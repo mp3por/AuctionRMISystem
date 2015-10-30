@@ -7,4 +7,14 @@ public interface IAuctionItem extends Serializable {
     public Long getId();
 
     public void bidValue(Long bidderId, double bidValue);
+
+    String getItemName();
+
+    double getValue();
+
+    long getLastBidder();
+
+    double getStartValue();
+
+    long getCreatorId();
 }
