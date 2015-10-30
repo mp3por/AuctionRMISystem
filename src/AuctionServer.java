@@ -10,9 +10,10 @@ public class AuctionServer {
     public AuctionServer (){
         try {
             IAuctionRemote auction = new Auction();
-            System.out.format("Auction created(%s). Now lets register it.",auction);
+            System.out.format("Auction created(%s). Now lets register it.\n",auction);
             Naming.rebind(Utils.ACTION_REGISTRY_NAME, auction);
-            System.out.println("Auction registered.");
+            System.out.println("Auction registered.\n");
+            System.out.println("---------------------------- AUCTION STARTED -----------------------------");
         } catch (Exception e) {
             System.out.format("export exception - %s\n", e.getMessage());
             e.printStackTrace();

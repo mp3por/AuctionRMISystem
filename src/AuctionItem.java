@@ -1,5 +1,4 @@
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
-
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,6 +25,17 @@ public class AuctionItem implements IAuctionItem {
     private boolean isAlive;
     private long timeAlive;
 
+//    public static AuctionItem createAuctionItem(long creatorId, Auction auction, String itemName, double startValue, Date endDate) {
+//        AuctionItem item = null;
+//        System.out.println("endDate.after(now)?:" + endDate.after(new Date()));
+//        Date now = new Date();
+//        if (endDate.after(now)) {
+//            long timeAlive = endDate.getTime() - now.getTime();
+//            item = new AuctionItem(creatorId, auction, itemName, startValue, endDate,timeAlive);
+//        }
+//        return item;
+//    }
+
     public AuctionItem(long creatorId, Auction auction, String itemName, double startValue, Date endDate, long timeAlive) {
         this.creatorId = creatorId;
         this.id = ids++;
@@ -44,30 +54,39 @@ public class AuctionItem implements IAuctionItem {
             @Override
             public void run() {
                 stopBids();
-//                auction.notifyItemComplete(auctionItem);
+                auction.itemCompleteCallback(auctionItem);
             }
-        }, 0, timeAlive);
+        }, timeAlive);
         this.auctionItem = this;
     }
 
     private void stopBids() {
-        System.out.format("Item {%d,%s} bidding closed.", this.id, this.itemName);
+        System.out.format("Item {%d,%s} bidding closed.\n", this.id, this.itemName);
         isAlive = false;
+        aliveTimer = null;
     }
 
     @Override
-    public void bidValue(Long bidderId, double bidValue) {
+    public boolean bidValue(Long bidderId, double bidValue) {
+        boolean result = false;
         if (isAlive && bidValue > 0 && bidValue > this.value) {
-            System.out.format("Bid of '%f' value for item {%d,%s} by bidder(%d) successful.",bidValue,this.id,this.itemName,bidderId);
+            System.out.format("Bid of '%f' value for item {%d,%s} by bidder(%d) successful.", bidValue, this.id, this.itemName, bidderId);
             this.value = bidValue;
             this.lastBidder = bidderId;
+            result = true;
         }
+        return result;
     }
 
     /* --------- Getters ------------ */
     @Override
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public Date getEndDate() {
+        return endDate;
     }
 
     @Override
@@ -93,6 +112,11 @@ public class AuctionItem implements IAuctionItem {
     @Override
     public long getCreatorId() {
         return creatorId;
+    }
+
+    @Override
+    public boolean isSold() {
+        return Utils.DEFAULT_BIDDER_ID != this.lastBidder;
     }
 
     @Override

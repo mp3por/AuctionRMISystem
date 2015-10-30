@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by vbk20 on 29/10/2015.
@@ -6,7 +7,9 @@ import java.io.Serializable;
 public interface IAuctionItem extends Serializable {
     public Long getId();
 
-    public void bidValue(Long bidderId, double bidValue);
+    public boolean bidValue(Long bidderId, double bidValue);
+
+    Date getEndDate();
 
     String getItemName();
 
@@ -17,4 +20,6 @@ public interface IAuctionItem extends Serializable {
     double getStartValue();
 
     long getCreatorId();
+
+    boolean isSold();
 }
