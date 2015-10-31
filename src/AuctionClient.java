@@ -9,19 +9,18 @@ import java.util.*;
  * Created by vbk20 on 29/10/2015.
  */
 public class AuctionClient extends UnicastRemoteObject implements IAuctionClientRemote {
-    private static long IDS = 0;
     private long id;
 
     IAuctionRemote auction = null;
     DateFormat formatter = new SimpleDateFormat("dd/MM/yy-HH:mm:ss");
 
     public AuctionClient() throws RemoteException {
-        this.id = IDS++;
         try {
-            System.out.format("Client starting\n");
+            System.out.format("Client starting.\n");
             Object o = Naming.lookup(Utils.ACTION_REGISTRY_NAME);
             auction = (IAuctionRemote) o;
-            auction.registerClient(this);
+            this.id = auction.registerClient(this);
+            System.out.format("Client with ID (-- %d --) registered.\n", this.id);
         } catch (Exception e) {
             System.out.format("Error obtaining (--" + Utils.ACTION_REGISTRY_NAME + "--) from registry\n");
             e.printStackTrace();
@@ -56,7 +55,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                 ;
                             case "--bid":
                                 Long itemId = Long.valueOf(input[1]);
-                                double bidValue = Double.valueOf(input[2]);
+                                double bidValue = Double.parseDouble(input[2]);
                                 String result = auction.bidForItem(this.id, itemId, bidValue);
                                 System.out.println(result);
                                 break;
@@ -108,16 +107,18 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
     }
 
     @Override
-    public void auctionItemEnd(boolean isSold, long winnerId, String itemName, double finalPrice, long creatorId) throws RemoteException {
+    public void auctionItemEnd(long itemId, boolean isSold, long winnerId, String itemName, double finalPrice, long creatorId) throws RemoteException {
         if (isSold) {
             if (winnerId == this.id) {
-                System.out.format("Concratulations! You won '%s' with bid for: %d.\n", itemName, finalPrice);
+                System.out.format("Concratulations! You won '%s,%d' with bid for: %f.\n", itemName, itemId, finalPrice);
+            } else if (creatorId == this.id) {
+                System.out.format("GREAT! Your item '%s,%d' was won by client (-- %d --) for %f.\n", itemName, itemId, winnerId, finalPrice);
             } else {
-                System.out.format("Client '%d' won '%s' with bid for: %d.\n",winnerId,itemName,finalPrice);
+                System.out.format("Client '%d' won '%s,%d' with bid for: %f.\n", winnerId, itemName, itemId, finalPrice);
             }
         } else {
-            if (creatorId == this.id){
-                System.out.format("Your item (%s) was not sold because no one bid more than the starting price.\n",itemName);
+            if (creatorId == this.id) {
+                System.out.format("Your item (%s,%d) was not sold because no one bid more than the starting price.\n", itemName, itemId);
             }
         }
     }
