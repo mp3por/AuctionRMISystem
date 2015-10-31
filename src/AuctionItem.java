@@ -9,7 +9,7 @@ import java.util.TimerTask;
  */
 public class AuctionItem implements IAuctionItem {
 
-    private static final DateFormat formatter = new SimpleDateFormat("dd/MM/yy-HH:mm:ss");
+    private static final DateFormat formatter = Utils.formatter;
     private static final int ITEM_NAME_MIN_LENGTH = 3;
     private static final long ITEM_MIN_ALIVE_TIME_SEC = 10;
     private static final double ITEM_MIN_START_VALUE = 10;

@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     // static finals
     private static final int AUCTION_ITEM_EXPIRE_TIME_MILISEC = 120000; // 10s expiration time
-    private static final DateFormat formatter = new SimpleDateFormat("dd/MM/yy-HH:mm:ss");
+    private static final DateFormat formatter = Utils.formatter;
     // static
     private static long clientIds = 0;
     // fields
