@@ -17,12 +17,12 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
     public AuctionClient() throws RemoteException {
         try {
             System.out.format("Client starting.\n");
-            Object o = Naming.lookup(Utils.ACTION_REGISTRY_NAME);
+            Object o = Naming.lookup(Utils.AUCTION_REGISTRY_NAME);
             auction = (IAuctionRemote) o;
             this.id = auction.registerClient(this);
             System.out.format("Client with ID (-- %d --) registered.\n", this.id);
         } catch (Exception e) {
-            System.out.format("Error obtaining (--" + Utils.ACTION_REGISTRY_NAME + "--) from registry\n");
+            System.out.format("Error obtaining (--" + Utils.AUCTION_REGISTRY_NAME + "--) from registry\n");
             e.printStackTrace();
             System.exit(1);
         }
