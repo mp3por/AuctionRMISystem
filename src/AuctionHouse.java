@@ -71,32 +71,66 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
     public String getAuctionLiveItems(long auctionId, long clientId) {
         IAuctionRemote auction = activeAuctions.get(auctionId);
         String result = "";
-        try {
-            result = auction.getAuctionLiveItems(clientId);
-            System.out.printf("AUCTION_HOUSE: Client (%d) wanted to see live items of Auction (%d).\n", clientId, auctionId);
-        } catch (RemoteException e) {
-            System.out.printf("AUCTION_HOUSE: Client (%d) wanted to see live items of UNREACHABLE Auction (%d).\n", clientId, auctionId);
-            result = String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId);
+        if (auction != null) {
+            try {
+                result = auction.getAuctionLiveItems(clientId);
+                System.out.printf("AUCTION_HOUSE: Client (%d) wanted to see live items of Auction (%d).\n", clientId, auctionId);
+            } catch (RemoteException e) {
+                System.out.printf("AUCTION_HOUSE: Client (%d) wanted to see live items of UNREACHABLE Auction (%d).\n", clientId, auctionId);
+                result = String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId);
+            }
+        } else {
+            result = String.format("Auction with id (-- %d --) either does not exist.\n",auctionId);
         }
 
         return result;
     }
 
     @Override
-    public void registerClientForAuction(long auctionId, IAuctionClientRemote client) throws RemoteException {
+    public String registerClientForAuction(long auctionId, IAuctionClientRemote client) throws RemoteException {
         IAuctionRemote auction = activeAuctions.get(auctionId);
-        auction.registerClient(client);
+        String result = "You have successfully registered for Auction " + auctionId + ".\n";
+        if (auction != null){
+            try {
+                auction.registerClient(client);
+            } catch (RemoteException e) {
+                result = String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId);
+            }
+        } else {
+            result = String.format("Auction with id (-- %d --) either does not exist.\n",auctionId);
+        }
+        return result;
     }
 
     @Override
     public String bidForItem(long bidderId, long auctionId, long itemId, double bidValue) throws RemoteException {
         IAuctionRemote auction = activeAuctions.get(auctionId);
-        return auction.bidForItem(bidderId, itemId, bidValue);
+        String result = "";
+        if (auction != null){
+            try {
+                result = auction.bidForItem(bidderId, itemId, bidValue);
+            } catch (RemoteException e) {
+                result = String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId);
+            }
+        } else {
+            result = String.format("Auction with id (-- %d --) either does not exist.\n",auctionId);
+        }
+        return result;
     }
 
     @Override
     public String createAndRegisterAuctionItem(long creatorId, long auctionId, String itemName, double value, Date endDate) throws RemoteException {
         IAuctionRemote auction = activeAuctions.get(auctionId);
-        return auction.createAndRegisterAuctionItem(creatorId,itemName,value,endDate);
+        String result = "";
+        if (auction != null){
+            try {
+                result = auction.createAndRegisterAuctionItem(creatorId,itemName,value,endDate);
+            } catch (RemoteException e) {
+                result = String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId);
+            }
+        } else {
+            result = String.format("Auction with id (-- %d --) either does not exist.\n",auctionId);
+        }
+        return result;
     }
 }

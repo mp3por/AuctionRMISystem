@@ -88,7 +88,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     }
 
     /**
-     * A method for clients to use when they want to bid for an item in this auction
+     * A method for bidding for an item in this auction
      *
      * @param bidderId the id of the bidder
      * @param itemId   the id of the item
@@ -121,7 +121,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     }
 
     /**
-     * Clients can use this method to register as a participant in this Auction
+     * Register as a participant in this Auction
      *
      * @param client
      * @throws RemoteException

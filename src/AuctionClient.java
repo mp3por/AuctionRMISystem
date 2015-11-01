@@ -4,6 +4,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -25,7 +26,8 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
             auctionHouseRemote = (IAuctionHouseRemote) o;
 
             this.id = auctionHouseRemote.registerClient(this);
-            auctionHouseRemote.registerClientForAuction(auctionId, this);
+            String result = auctionHouseRemote.registerClientForAuction(auctionId, this);
+
             System.out.format("Client with ID (-- %d --) registered.\n", this.id);
         } catch (Exception e) {
             e.printStackTrace();
@@ -46,13 +48,20 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                             ;
                         case "--list-auction-items":
                             switch (input.length) {
-                                case 1:
+                                case 2:
                                     System.out.println("Items currently in auction: ");
-                                    String auctionItems = auctionHouseRemote.getAuctionLiveItems(auctionId, this.id);
-                                    System.out.println(auctionItems);
+                                    try {
+                                        long auctionId = Long.valueOf(input[1]);
+                                        String auctionItems = auctionHouseRemote.getAuctionLiveItems(auctionId, this.id);
+                                        System.out.println(auctionItems);
+                                    } catch (NumberFormatException e) {
+                                        System.out.printf("The ID must consist of only NUMBERS.\n");
+                                    } catch (RemoteException e) {
+                                        System.out.println("Auction House is unavailable.");
+                                    }
                                     break;
                                 default:
-                                    System.out.printf("Too many or too few arguments.\n");
+                                    System.out.printf("Too many or too few arguments. Must be exactly 2 arguments.\n");
                             }
                             break;
                         case "--b":
@@ -60,31 +69,62 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                         case "--bid":
                             switch (input.length) {
                                 case 3:
-                                    Long itemId = Long.valueOf(input[1]);
-                                    double bidValue = Double.parseDouble(input[2]);
-                                    String result = auctionHouseRemote.bidForItem(this.id, auctionId, itemId, bidValue);
-                                    System.out.println(result);
+                                    try {
+                                        Long itemId = Long.valueOf(input[1]);
+                                        try {
+                                            double bidValue = Double.parseDouble(input[2]);
+                                            String result = auctionHouseRemote.bidForItem(this.id, auctionId, itemId, bidValue);
+                                            System.out.println(result);
+                                        } catch (NumberFormatException e) {
+                                            System.out.printf("The bidValue must be of type Double (E.x: 10.25).");
+                                        } catch (RemoteException e) {
+                                            System.out.println("Auction House is unavailable.");
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        System.out.printf("The itemID must consist of only NUMBERS.");
+                                    }
+//                                    Long itemId = Long.valueOf(input[1]);
+//                                    double bidValue = Double.parseDouble(input[2]);
+//                                    String result = auctionHouseRemote.bidForItem(this.id, auctionId, itemId, bidValue);
+//                                    System.out.println(result);
                                     break;
                                 default:
-                                    System.out.printf("Too many or too few arguments.\n");
+                                    System.out.printf("Too many or too few arguments. Must be exactly 4 arguments\n");
                             }
                             break;
                         case "--c":
                             ;
                         case "--create":
-                            switch (input.length){
+                            switch (input.length) {
                                 case 4:
-                                    String itemName = input[1];
-                                    double value = Double.valueOf(input[2]);
-                                    Date endDate = formatter.parse(input[3]);
+                                    try {
+                                        String itemName = input[1];
+                                        double value = Double.valueOf(input[2]);
+                                        try {
+                                            Date endDate = formatter.parse(input[3]);
+                                            String result = auctionHouseRemote.createAndRegisterAuctionItem(this.id, auctionId, itemName, value, endDate);
+                                            System.out.println("Create result: " + result);
+                                        } catch (ParseException e) {
+                                            System.out.println("Date must be in the format dd/MM/yyyy-hh:mm:ss.");
+                                        } catch (RemoteException e) {
+                                            System.out.println("Auction House is unavailable.");
+                                        }
+                                    } catch (NumberFormatException e) {
+                                        System.out.printf("The bidValue must be of type Double (E.x: 10.25).");
+                                    }
 
-//                                String result = auction.createAndRegisterAuctionItem(this.id, itemName, value, endDate);
-                                    String result = auctionHouseRemote.createAndRegisterAuctionItem(this.id, auctionId, itemName, value, endDate);
 
-                                    System.out.println("Create result: " + result);
+//                                    String itemName = input[1];
+//                                    double value = Double.valueOf(input[2]);
+//                                    Date endDate = formatter.parse(input[3]);
+//
+////                                String result = auction.createAndRegisterAuctionItem(this.id, itemName, value, endDate);
+//                                    String result = auctionHouseRemote.createAndRegisterAuctionItem(this.id, auctionId, itemName, value, endDate);
+//
+//                                    System.out.println("Create result: " + result);
                                     break;
                                 default:
-                                    System.out.printf("Too many or too few arguments.\n");
+                                    System.out.printf("Too many or too few arguments. Must be exactly 5 arguments\n");
                             }
                             break;
                         default:
@@ -93,66 +133,6 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                     Thread.sleep(1000); // sleep for one second
                 }
 
-//                switch (input.length) {
-//                    case 1: // one argument commands
-//                        switch (input[0]) {
-//                            case "--l":// handle 'l' to do same as 'list'
-//                                ;
-//                            case "--list-auction-items": // list all auction items
-//                                System.out.println("Items currently in auction: ");
-//                                String auctionItems = auctionHouseRemote.getAuctionLiveItems(auctionId, this.id);
-//                                System.out.println(auctionItems);
-//                                break;
-//                            default:
-//                                System.out.format("Unrecognizable command :%s\n", input);
-//                        }
-//                        break;
-//                    case 2: // two argument commands
-//                        switch (input[0]) {
-//                            case "--l":
-//                                ;
-//                            case "--list-auction-items":
-//                                break;
-//                            default:
-//                                System.out.format("Unrecognizable command :%s\n", input);
-//                        }
-//                    case 3: // three arguments commands
-//                        switch (input[0]) {
-//                            case "--b":// handle 'b' to do same as 'bid'
-//                                ;
-//                            case "--bid":
-//                                Long itemId = Long.valueOf(input[1]);
-//                                double bidValue = Double.parseDouble(input[2]);
-//                                String result = auctionHouseRemote.bidForItem(this.id, auctionId, itemId, bidValue);
-//                                System.out.println(result);
-//                                break;
-//                            default:
-//                                System.out.format("Unrecognizable command :%s\n", input[0]);
-//                        }
-//                        break;
-//                    case 4: // four arguments commands
-//                        switch (input[0]) {
-//                            case "--c":// handle 'c' to do the same as 'create'
-//                                ;
-//                            case "--create": // create auction items
-//                                String itemName = input[1];
-//                                double value = Double.valueOf(input[2]);
-//                                Date endDate = formatter.parse(input[3]);
-//
-////                                String result = auction.createAndRegisterAuctionItem(this.id, itemName, value, endDate);
-//                                String result = auctionHouseRemote.createAndRegisterAuctionItem(this.id, auctionId, itemName, value, endDate);
-//
-//                                System.out.println("Create result: " + result);
-//                                break;
-//                            default:
-//                                System.out.format("Unrecognizable command :%s\n", input[0]);
-//                        }
-//                        break;
-//                    default:
-//                        System.out.format("Too many arguments in the command :%s\n", buf);
-//                }
-//                Thread.sleep(1000); // sleep for one second
-                
             } catch (InterruptedException e) {
                 ; // ignored
             } catch (Exception e) {
