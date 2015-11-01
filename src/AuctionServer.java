@@ -14,11 +14,11 @@ public class AuctionServer {
             IAuctionHouseRemote auctionHouseRemote = (IAuctionHouseRemote) auctionHouseServerRegistry.lookup(Utils.AUCTION_HOUSE_REGISTRY_NAME);
             IAuctionRemote auction = new Auction(auctionName, auctionHouseRemote);
 
-            System.out.format("Auction created(%s). Now lets register it.\n", auction);
-            String auctionRegistryName = String.format(Utils.AUCTION_REGISTRY_NAME, auctionName);
-            Registry auctionServerRegistry = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT);
-            auctionServerRegistry.rebind(auctionRegistryName, auction);
-            System.out.println("Auction registered to the global AUCTION_SERVER RMI registry.\n");
+//            System.out.format("Auction created(%s). Now lets register it.\n", auction);
+//            String auctionRegistryName = String.format(Utils.AUCTION_REGISTRY_NAME, auctionName);
+//            Registry auctionServerRegistry = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT);
+//            auctionServerRegistry.rebind(auctionRegistryName, auction);
+//            System.out.println("Auction registered to the global AUCTION_SERVER RMI registry.\n");
 
             System.out.println("Adding initial bids.\n");
             Date now = new Date();

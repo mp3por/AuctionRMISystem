@@ -15,7 +15,6 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
     private long id;
 
     IAuctionHouseRemote auctionHouseRemote = null;
-    long auctionId = 0;
     DateFormat formatter = new SimpleDateFormat("dd/MM/yy-HH:mm:ss");
 
     public AuctionClient() throws RemoteException {
@@ -26,7 +25,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
             auctionHouseRemote = (IAuctionHouseRemote) o;
 
             this.id = auctionHouseRemote.registerClient(this);
-            String result = auctionHouseRemote.registerClientForAuction(auctionId, this);
+            auctionHouseRemote.registerClientForAuction(0, this);
 
             System.out.format("Client with ID (-- %d --) registered.\n", this.id);
         } catch (Exception e) {
@@ -55,7 +54,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                         String auctionItems = auctionHouseRemote.getAuctionLiveItems(auctionId, this.id);
                                         System.out.println(auctionItems);
                                     } catch (NumberFormatException e) {
-                                        System.out.printf("The ID must consist of only NUMBERS.\n");
+                                        System.out.printf("The auctionID must consist of only NUMBERS.\n");
                                     } catch (RemoteException e) {
                                         System.out.println("Auction House is unavailable.");
                                     }
@@ -68,20 +67,25 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                             ;
                         case "--bid":
                             switch (input.length) {
-                                case 3:
+                                case 4:
                                     try {
-                                        Long itemId = Long.valueOf(input[1]);
+                                        long auctionId = Long.valueOf(input[1]);
                                         try {
-                                            double bidValue = Double.parseDouble(input[2]);
-                                            String result = auctionHouseRemote.bidForItem(this.id, auctionId, itemId, bidValue);
-                                            System.out.println(result);
+                                            long itemId = Long.valueOf(input[2]);
+                                            try {
+                                                double bidValue = Double.parseDouble(input[3]);
+                                                String result = auctionHouseRemote.bidForItem(this.id, auctionId, itemId, bidValue);
+                                                System.out.println(result);
+                                            } catch (NumberFormatException e) {
+                                                System.out.printf("The bidValue must be of type Double (E.x: 10.25).");
+                                            } catch (RemoteException e) {
+                                                System.out.println("Auction House is unavailable.");
+                                            }
                                         } catch (NumberFormatException e) {
-                                            System.out.printf("The bidValue must be of type Double (E.x: 10.25).");
-                                        } catch (RemoteException e) {
-                                            System.out.println("Auction House is unavailable.");
+                                            System.out.printf("The itemID must consist of only NUMBERS.");
                                         }
                                     } catch (NumberFormatException e) {
-                                        System.out.printf("The itemID must consist of only NUMBERS.");
+                                        System.out.printf("The autionID must consist of only NUMBERS.");
                                     }
 //                                    Long itemId = Long.valueOf(input[1]);
 //                                    double bidValue = Double.parseDouble(input[2]);
@@ -96,21 +100,26 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                             ;
                         case "--create":
                             switch (input.length) {
-                                case 4:
+                                case 5:
                                     try {
-                                        String itemName = input[1];
-                                        double value = Double.valueOf(input[2]);
+                                        long auctionId = Long.valueOf(input[1]);
                                         try {
-                                            Date endDate = formatter.parse(input[3]);
-                                            String result = auctionHouseRemote.createAndRegisterAuctionItem(this.id, auctionId, itemName, value, endDate);
-                                            System.out.println("Create result: " + result);
-                                        } catch (ParseException e) {
-                                            System.out.println("Date must be in the format dd/MM/yyyy-hh:mm:ss.");
-                                        } catch (RemoteException e) {
-                                            System.out.println("Auction House is unavailable.");
+                                            String itemName = input[2];
+                                            double value = Double.valueOf(input[3]);
+                                            try {
+                                                Date endDate = formatter.parse(input[4]);
+                                                String result = auctionHouseRemote.createAndRegisterAuctionItem(this.id, auctionId, itemName, value, endDate);
+                                                System.out.println("Create result: " + result);
+                                            } catch (ParseException e) {
+                                                System.out.println("Date must be in the format dd/MM/yyyy-hh:mm:ss.");
+                                            } catch (RemoteException e) {
+                                                System.out.println("Auction House is unavailable.");
+                                            }
+                                        } catch (NumberFormatException e) {
+                                            System.out.printf("The bidValue must be of type Double (E.x: 10.25).");
                                         }
                                     } catch (NumberFormatException e) {
-                                        System.out.printf("The bidValue must be of type Double (E.x: 10.25).");
+                                        System.out.printf("The autionID must consist of only NUMBERS.");
                                     }
 
 

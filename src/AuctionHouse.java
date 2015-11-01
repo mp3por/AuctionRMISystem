@@ -86,7 +86,7 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
                 result = String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId);
             }
         } else {
-            result = String.format("Auction with id (-- %d --) either does not exist.\n",auctionId);
+            result = String.format("Auction with id (-- %d --) does not exist.\n",auctionId);
         }
 
         return result;
@@ -103,7 +103,7 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
                 result = String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId);
             }
         } else {
-            result = String.format("Auction with id (-- %d --) either does not exist.\n",auctionId);
+            result = String.format("Auction with id (-- %d --) does not exist.\n",auctionId);
         }
         return result;
     }
@@ -119,7 +119,7 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
                 result = String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId);
             }
         } else {
-            result = String.format("Auction with id (-- %d --) either does not exist.\n",auctionId);
+            result = String.format("Auction with id (-- %d --) does not exist.\n",auctionId);
         }
         return result;
     }
@@ -135,7 +135,7 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
                 result = String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId);
             }
         } else {
-            result = String.format("Auction with id (-- %d --) either does not exist.\n",auctionId);
+            result = String.format("Auction with id (-- %d --) does not exist.\n",auctionId);
         }
         return result;
     }
