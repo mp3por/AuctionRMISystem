@@ -1,7 +1,7 @@
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,25 +10,31 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     // static finals
-    private static final int AUCTION_ITEM_EXPIRE_TIME_MILISEC = 120000; // 10s expiration time
+    private static final int AUCTION_ITEM_EXPIRE_TIME_MILISEC = 120000; // 120s expiration time
     private static final DateFormat formatter = Utils.formatter;
     // static
-    private static long clientIds = 0;
+    private static long auctionItemIds = 0;
     // fields
+    IAuctionHouseRemote auctionHouse;
     private Map<Long, IAuctionItem> liveActionItems;
     private Map<Long, IAuctionItem> finishedItems;
     private Map<Long, IAuctionClientRemote> activeClients;
+    private long id;
+    private String name;
 
-    public Auction() throws RemoteException {
+    public Auction(String auctionName, IAuctionHouseRemote auctionHouse) throws RemoteException, NotBoundException {
+        // initialize local variables
         liveActionItems = new ConcurrentHashMap<Long, IAuctionItem>();
         finishedItems = new ConcurrentHashMap<Long, IAuctionItem>();
         activeClients = new ConcurrentHashMap<Long, IAuctionClientRemote>();
-        System.out.format("Creating server object\n");
+        this.id = auctionHouse.registerAuction(this);
+        this.name = auctionName;
+        System.out.format("AUCTION: created.\n");
     }
 
     @Override
-    public String getAuctionLiveItems(long id) throws RemoteException {
-        System.out.format("AUCTION: Client (%d) requested auctionItems.\n", id);
+    public String getAuctionLiveItems(long clientId) throws RemoteException {
+        System.out.format("AUCTION: Client (%d) requested auctionItems.\n", clientId);
         StringBuilder b = new StringBuilder();
         for (long key : liveActionItems.keySet()) {
             IAuctionItem item = liveActionItems.get(key);
@@ -39,9 +45,10 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
 
     /**
      * Creates and Registers an Auction Item to this Auction
-     * @param creatorId the creator id (must be registered)
-     * @param itemName  the item name
-     * @param value the item initial value
+     *
+     * @param creatorId   the creator id (must be registered)
+     * @param itemName    the item name
+     * @param value       the item initial value
      * @param closingDate the item end time
      * @return String representing the result. If the creation was successful it contains the created Auction Item ID for client's reference
      * @throws RemoteException
@@ -51,11 +58,12 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
         String result = "";
         AuctionItem i = null;
         try {
-            i = new AuctionItem(creatorId, this, itemName, value, closingDate);
-            registerAuctionItem(i);
+            long newAuctionItemId = auctionItemIds++;
+            i = new AuctionItem(newAuctionItemId,creatorId, this, itemName, value, closingDate);
+            registerAuctionItem(newAuctionItemId,i);
 
-            System.out.format("AUCTION: Client (-- %d --) created and registered a new AuctionItem {%d,%s,%f,%s}.\n", creatorId, i.getId(), itemName, value, formatter.format(closingDate));
-            result = "Created new AuctionItem with id:" + i.getId();
+            System.out.format("AUCTION: Client (-- %d --) created and registered a new AuctionItem {%d,%s,%f,%s}.\n", creatorId, newAuctionItemId, itemName, value, formatter.format(closingDate));
+            result = "Created new AuctionItem with id:" + newAuctionItemId;
         } catch (AuctionItem.AuctionItemNegativeStartValueException e) {
             result = e.getMessage();
             System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
@@ -72,16 +80,18 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
 
     /**
      * Registers an Auction Item to this Auction
+     *
      * @param item
      */
-    public void registerAuctionItem(IAuctionItem item) {
-        liveActionItems.put(item.getId(), item);
+    public void registerAuctionItem(long auctionItemId,IAuctionItem item) {
+        liveActionItems.put(auctionItemId, item);
     }
 
     /**
      * A method for clients to use when they want to bid for an item in this auction
+     *
      * @param bidderId the id of the bidder
-     * @param itemId the id of the item
+     * @param itemId   the id of the item
      * @param bidValue the bid value
      * @return result holds the String representation of what happened so that the client knows
      * @throws RemoteException
@@ -90,7 +100,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     public String bidForItem(long bidderId, long itemId, double bidValue) throws RemoteException {
 
         // check if the API is being abused
-        if (!activeClients.containsKey(bidderId)){
+        if (!activeClients.containsKey(bidderId)) {
             return "You have not registered as a client to this auction. Please register first!";
         }
 
@@ -104,7 +114,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
         } else {
             // if item DOES NOT exist
             System.out.format("AUCTION: Client(%d) is bidding '%f' for item(%d) that is not for sale.\n", bidderId, bidValue, itemId);
-            result = String.format("This item is no longer available for bidding or there is no Auction Item with id '%d'.",itemId);
+            result = String.format("This item is no longer available for bidding or there is no Auction Item with id '%d'.", itemId);
         }
 
         return result;
@@ -112,20 +122,20 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
 
     /**
      * Clients can use this method to register as a participant in this Auction
+     *
      * @param client
-     * @return
      * @throws RemoteException
      */
     @Override
-    public long registerClient(IAuctionClientRemote client) throws RemoteException {
-        Long clientId = this.clientIds++;
-        System.out.format("AUCTION: Registering client: %d.\n", clientId);
+    public void registerClient(IAuctionClientRemote client) throws RemoteException {
+        long clientId = client.getId();
+        System.out.format("AUCTION: Registering client: %s.\n", clientId );
         activeClients.put(clientId, client);
-        return clientId;
     }
 
     /**
      * Clients can use this method to unregister from this Auction. This way they will not receive notifications.
+     *
      * @param clientId the client ID
      * @throws RemoteException
      */
@@ -138,6 +148,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     /**
      * Method to call when a AuctionItem is complete. It logs the data, removes the item from the list with live
      * Auction Items and notifies all clients with the result.
+     *
      * @param finishedAuctionItem
      */
     public void itemCompleteCallback(IAuctionItem finishedAuctionItem) {
@@ -165,6 +176,16 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
                 activeClients.remove(key); // client no longer reachable.
             }
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public long getId() {
+        return id;
     }
 
     /**

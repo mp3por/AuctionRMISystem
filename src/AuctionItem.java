@@ -14,8 +14,6 @@ public class AuctionItem implements IAuctionItem {
     private static final long ITEM_MIN_ALIVE_TIME_SEC = 10;
     private static final double ITEM_MIN_START_VALUE = 10;
 
-    private static long ids = 0;
-
     private long id;
     private long creatorId;
     private long lastBidder;
@@ -42,7 +40,7 @@ public class AuctionItem implements IAuctionItem {
 //        return item;
 //    }
 
-    public AuctionItem(long creatorId, Auction auction, String itemName, double startValue, Date endDate) throws AuctionItemNegativeStartValueException, AuctionItemInvalidEndDateException, AuctionItemInvalidItemNameException {
+    public AuctionItem(long id,long creatorId, Auction auction, String itemName, double startValue, Date endDate) throws AuctionItemNegativeStartValueException, AuctionItemInvalidEndDateException, AuctionItemInvalidItemNameException {
 
         // Error checking
         Date now = new Date();
@@ -64,7 +62,7 @@ public class AuctionItem implements IAuctionItem {
         // Fields assignment
         this.timeAlive = aliveTime;
         this.creatorId = creatorId;
-        this.id = ids++;
+        this.id = id;
         this.itemName = itemName;
         this.startValue = startValue;
         this.value = this.startValue;

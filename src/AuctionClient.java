@@ -1,5 +1,7 @@
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -11,18 +13,21 @@ import java.util.*;
 public class AuctionClient extends UnicastRemoteObject implements IAuctionClientRemote {
     private long id;
 
-    IAuctionRemote auction = null;
+    IAuctionHouseRemote auctionHouseRemote = null;
+    long auctionId = 0;
     DateFormat formatter = new SimpleDateFormat("dd/MM/yy-HH:mm:ss");
 
     public AuctionClient() throws RemoteException {
         try {
             System.out.format("Client starting.\n");
-            Object o = Naming.lookup(Utils.AUCTION_REGISTRY_NAME);
-            auction = (IAuctionRemote) o;
-            this.id = auction.registerClient(this);
+            Registry reg = LocateRegistry.getRegistry("localhost", Utils.AUCTION_HOUSE_SERVER_RMI_PORT);
+            Object o = reg.lookup(Utils.AUCTION_HOUSE_REGISTRY_NAME);
+            auctionHouseRemote = (IAuctionHouseRemote) o;
+
+            this.id = auctionHouseRemote.registerClient(this);
+            auctionHouseRemote.registerClientForAuction(auctionId,this);
             System.out.format("Client with ID (-- %d --) registered.\n", this.id);
         } catch (Exception e) {
-            System.out.format("Error obtaining (--" + Utils.AUCTION_REGISTRY_NAME + "--) from registry\n");
             e.printStackTrace();
             System.exit(1);
         }
@@ -42,7 +47,8 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                 ;
                             case "--list-auction-items": // list all auction items
                                 System.out.println("Items currently in auction: ");
-                                String auctionItems = auction.getAuctionLiveItems(this.id);
+                                //String auctionItems = auction.getAuctionLiveItems(this.id);
+                                String auctionItems = auctionHouseRemote.getAuctionLiveItems(auctionId,this.id);
                                 System.out.println(auctionItems);
                                 break;
                             default:
@@ -56,8 +62,8 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                             case "--bid":
                                 Long itemId = Long.valueOf(input[1]);
                                 double bidValue = Double.parseDouble(input[2]);
-                                String result = auction.bidForItem(this.id, itemId, bidValue);
-                                System.out.println(result);
+//                                String result = auction.bidForItem(this.id, itemId, bidValue);
+//                                System.out.println(result);
                                 break;
                             default:
                                 System.out.format("Unrecognizable command :%s\n", input[0]);
@@ -72,8 +78,8 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                 double value = Double.valueOf(input[2]);
                                 Date endDate = formatter.parse(input[3]);
 
-                                String result = auction.createAndRegisterAuctionItem(this.id, itemName, value, endDate);
-                                System.out.println("Create result: " + result);
+//                                String result = auction.createAndRegisterAuctionItem(this.id, itemName, value, endDate);
+//                                System.out.println("Create result: " + result);
                                 break;
                             default:
                                 System.out.format("Unrecognizable command :%s\n", input[0]);
@@ -92,9 +98,10 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
             }
         }
         try {
-            auction.unregisterClient(this.id);
+            auctionHouseRemote.unregisterClient(this.id);
+            auctionHouseRemote = null;
         } catch (RemoteException e) {
-            auction = null;
+            auctionHouseRemote = null;
         }
     }
 
