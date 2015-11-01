@@ -2,7 +2,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Date;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -31,8 +30,8 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
     }
 
     @Override
-    public void unregisterAuction(UUID auctionId) {
-        System.out.printf("AUCTION_HOUSE: unregistering auction with ID: %s.\n", auctionId.toString());
+    public void unregisterAuction(long auctionId) {
+        System.out.printf("AUCTION_HOUSE: unregistering auction with ID: %d.\n", auctionId);
         activeAuctions.remove(auctionId);
     }
 
@@ -49,6 +48,13 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
     public void unregisterClient(long clientId) throws RemoteException {
         System.out.printf("AUCTION_HOUSE: Unregistering client with ID: %d.\n", clientId);
         activeClients.remove(clientId);
+        for (long key: activeAuctions.keySet()){
+            try {
+                activeAuctions.get(key).unregisterClient(clientId);
+            } catch (RemoteException e){
+                activeAuctions.remove(key); // remove auction if unreachable
+            }
+        }
     }
 
     @Override

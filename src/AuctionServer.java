@@ -1,9 +1,6 @@
-import java.rmi.AlreadyBoundException;
-import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * Created by vbk20 on 29/10/2015.
