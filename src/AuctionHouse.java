@@ -1,5 +1,6 @@
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,5 +86,17 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
     public void registerClientForAuction(long auctionId, IAuctionClientRemote client) throws RemoteException {
         IAuctionRemote auction = activeAuctions.get(auctionId);
         auction.registerClient(client);
+    }
+
+    @Override
+    public String bidForItem(long bidderId, long auctionId, long itemId, double bidValue) throws RemoteException {
+        IAuctionRemote auction = activeAuctions.get(auctionId);
+        return auction.bidForItem(bidderId, itemId, bidValue);
+    }
+
+    @Override
+    public String createAndRegisterAuctionItem(long creatorId, long auctionId, String itemName, double value, Date endDate) throws RemoteException {
+        IAuctionRemote auction = activeAuctions.get(auctionId);
+        return auction.createAndRegisterAuctionItem(creatorId,itemName,value,endDate);
     }
 }
