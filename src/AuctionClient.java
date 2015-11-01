@@ -25,7 +25,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
             auctionHouseRemote = (IAuctionHouseRemote) o;
 
             this.id = auctionHouseRemote.registerClient(this);
-            auctionHouseRemote.registerClientForAuction(0, this);
+//            auctionHouseRemote.registerClientForAuction(0, this);
 
             System.out.format("Client with ID (-- %d --) registered.\n", this.id);
         } catch (Exception e) {
@@ -33,6 +33,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
             System.exit(1);
         }
 
+        printHelp();
         Scanner stdin = new Scanner(System.in);
         String buf = null;
         Boolean eof = false;
@@ -43,14 +44,42 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
 
                 if (buf.length() != 0) {
                     switch (input[0]) {
+                        case "--h":
+                            ;
+                        case "--help":
+                            printHelp();
+                            break;
+                        case "--r":
+                            ;
+                        case "--register-for-auction":
+                            switch (input.length){
+                                case 2:
+                                    try {
+                                        long auctionId = Long.valueOf(input[1]);
+                                        auctionHouseRemote.registerClientForAuction(auctionId, this);
+                                    } catch (NumberFormatException e) {
+                                        System.out.printf("The auctionID must consist of only NUMBERS.\n");
+                                    } catch (RemoteException e) {
+                                        System.out.println("Auction House is unavailable.");
+                                    }
+
+                                    break;
+                                default:
+                                    System.out.printf("Too many or too few arguments. Must be exactly 2 arguments.\n");
+                            }
+                            break;
                         case "--l":
                             ;
                         case "--list-auction-items":
                             switch (input.length) {
+                                case 1:
+                                    System.out.printf("Available Auctions in the Auction House:\n");
+                                    auctionHouseRemote.getActiveAuctions();
+                                    break;
                                 case 2:
-                                    System.out.println("Items currently in auction: ");
                                     try {
                                         long auctionId = Long.valueOf(input[1]);
+                                        System.out.printf("Items currently in auction (-- %d -- ):\n",input[1]);
                                         String auctionItems = auctionHouseRemote.getAuctionLiveItems(auctionId, this.id);
                                         System.out.println(auctionItems);
                                     } catch (NumberFormatException e) {
@@ -155,6 +184,16 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
         } catch (RemoteException e) {
             auctionHouseRemote = null;
         }
+    }
+
+    private void printHelp() {
+        System.out.printf("Hello,\nAvailable commands:\n" +
+                "\t* --l: Prints all available Auctions with their name and Ids\n" +
+                "\t* --l 'auctionId': Prints all available Auction Items (name + id) in the Auction with 'id'\n" +
+                "\t* --c 'auctionId' 'itemName' 'startValue' 'endDate': Creates a new Auction Item with the specified details\n" +
+                "\t* --b 'auctionId' 'itemId' 'bidValue':  Bids for that particular Auction Item in that particular Auction\n" +
+                "\t* --r 'auctionId': Registers you as a client for this particular Auction so that you can bid and/or create Auction Items\n" +
+                "\nRemember that you have to register (--r command) in an Auction before you can do bid for Items or create new Items in this Auction.\n");
     }
 
     public static void main(String[] args) {
