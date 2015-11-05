@@ -128,7 +128,6 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
             } catch (RemoteException e) {
                 throw new AuctionHouseException(String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId));
             } catch (AuctionException e) {
-                System.out.println("EEEEEEEEEEEEEEEEEEEEEEEEEEEE EEEEEEEEEEEEEEEEEEEEEEEEE");
                 throw new AuctionHouseException(e.getMessage());
             }
         } else {
