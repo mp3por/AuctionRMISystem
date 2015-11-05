@@ -16,6 +16,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
 
     IAuctionHouseRemote auctionHouseRemote = null;
     DateFormat formatter = new SimpleDateFormat("dd/MM/yy-HH:mm:ss");
+    Map<Long,List<Long>> itemsBid;
 
     public AuctionClient() throws RemoteException {
         try {
@@ -23,6 +24,8 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
             Registry reg = LocateRegistry.getRegistry("localhost", Utils.AUCTION_HOUSE_SERVER_RMI_PORT);
             Object o = reg.lookup(Utils.AUCTION_HOUSE_REGISTRY_NAME);
             auctionHouseRemote = (IAuctionHouseRemote) o;
+
+            itemsBid = new HashMap<Long,List<Long>>();
 
             this.id = auctionHouseRemote.registerClient(this);
 //            auctionHouseRemote.registerClientForAuction(0, this);
@@ -56,7 +59,8 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                 case 2:
                                     try {
                                         long auctionId = Long.valueOf(input[1]);
-                                        auctionHouseRemote.registerClientForAuction(auctionId, this);
+                                        String result = auctionHouseRemote.registerClientForAuction(auctionId, this);
+                                        System.out.println(result);
                                     } catch (NumberFormatException e) {
                                         System.out.printf("The auctionID must consist of only NUMBERS.\n");
                                     } catch (RemoteException e) {
@@ -79,7 +83,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                 case 2:
                                     try {
                                         long auctionId = Long.valueOf(input[1]);
-                                        System.out.printf("Items currently in auction (-- %d -- ):\n",input[1]);
+                                        System.out.printf("Items currently in auction (-- %d -- ):\n",auctionId);
                                         String auctionItems = auctionHouseRemote.getAuctionLiveItems(auctionId, this.id);
                                         System.out.println(auctionItems);
                                     } catch (NumberFormatException e) {
@@ -88,8 +92,9 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                         System.out.println("Auction House is unavailable.");
                                     }
                                     break;
+
                                 default:
-                                    System.out.printf("Too many or too few arguments. Must be exactly 2 arguments.\n");
+                                    System.out.printf("Too many or too few arguments. Must be exactly 0 or 1 arguments.\n");
                             }
                             break;
                         case "--b":

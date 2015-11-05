@@ -151,7 +151,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
      *
      * @param finishedAuctionItem
      */
-    public void itemCompleteCallback(IAuctionItem finishedAuctionItem) {
+    public void itemCompleteCallback(IAuctionItem finishedAuctionItem, List<Long> bidders) {
         System.out.format("AUCTION: Auction notified that item {ID: %d,name: %s,finalValue: %f, lastBidder:  %d} has finished.\n",
                 finishedAuctionItem.getId(),
                 finishedAuctionItem.getItemName(),
@@ -160,9 +160,9 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
         liveActionItems.remove(finishedAuctionItem.getId()); // remove from on-going auctionItems (thread-safe)
         new FinishedAuctionItem(finishedAuctionItem, finishedItems); // add to finished and schedule expiration
 
-        boolean winnerNotified = false;
-        for (long key : activeClients.keySet()) {
+        for (long key : bidders) {
             try {
+                // notify client
                 ((IAuctionClientRemote) activeClients.get(key)).auctionItemEnd(
                         finishedAuctionItem.getId(),
                         finishedAuctionItem.isSold(),
@@ -174,6 +174,8 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
                 System.out.format("AUCTION: Client (-- %d --) notified of finished AuctionItem '%s'.\n", key, finishedAuctionItem.getItemName());
             } catch (RemoteException e) {
                 activeClients.remove(key); // client no longer reachable.
+            } catch (NullPointerException e){
+                // client unregistered -> do nothing
             }
         }
     }

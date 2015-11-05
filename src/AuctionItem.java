@@ -1,19 +1,18 @@
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * Created by vbk20 on 29/10/2015.
  */
 public class AuctionItem implements IAuctionItem {
-
+    // static consts
     private static final DateFormat formatter = Utils.formatter;
     private static final int ITEM_NAME_MIN_LENGTH = 3;
     private static final long ITEM_MIN_ALIVE_TIME_SEC = 10;
     private static final double ITEM_MIN_START_VALUE = 10;
 
+    // properties
     private long id;
     private long creatorId;
     private long lastBidder;
@@ -21,10 +20,13 @@ public class AuctionItem implements IAuctionItem {
     private double startValue;
     private double value;
     private Date endDate;
+    private List<Long> bidders;
 
+    // connections
     private AuctionItem auctionItem;
     private Auction auction;
 
+    // alive variables
     private Timer aliveTimer;
     private boolean isAlive;
     private long timeAlive;
@@ -40,7 +42,7 @@ public class AuctionItem implements IAuctionItem {
 //        return item;
 //    }
 
-    public AuctionItem(long id,long creatorId, Auction auction, String itemName, double startValue, Date endDate) throws AuctionItemNegativeStartValueException, AuctionItemInvalidEndDateException, AuctionItemInvalidItemNameException {
+    public AuctionItem(long id, long creatorId, Auction auction, String itemName, double startValue, Date endDate) throws AuctionItemNegativeStartValueException, AuctionItemInvalidEndDateException, AuctionItemInvalidItemNameException {
 
         // Error checking
         Date now = new Date();
@@ -51,7 +53,7 @@ public class AuctionItem implements IAuctionItem {
         }
         if (startValue <= ITEM_MIN_START_VALUE) {
             System.out.println("AUCTION_ITEM: startValue(" + startValue + ") < ITEM_MIN_START_VALUE (10)");
-            String m = String.format("Invalid startValue ( %f )! The initial item value must be above %f.\n",startValue);
+            String m = String.format("Invalid startValue ( %f )! The initial item value must be above %f.\n", startValue);
             throw new AuctionItemNegativeStartValueException(m, startValue);
         }
         if (itemName.length() == ITEM_NAME_MIN_LENGTH) {
@@ -70,6 +72,7 @@ public class AuctionItem implements IAuctionItem {
         this.endDate = endDate;
         this.auction = auction;
         this.isAlive = true;
+        this.bidders = new ArrayList<Long>();
 
         // set up the Alive Timer
         this.aliveTimer = new Timer(true);
@@ -78,7 +81,7 @@ public class AuctionItem implements IAuctionItem {
             @Override
             public void run() {
                 stopBids();
-                auction.itemCompleteCallback(auctionItem);
+                auction.itemCompleteCallback(auctionItem, bidders);
             }
         }, this.timeAlive);
     }
@@ -100,7 +103,8 @@ public class AuctionItem implements IAuctionItem {
      * @return boolean if the bid was successfull.
      */
     @Override
-    public boolean bidValue(Long bidderId, double bidValue) {
+    public synchronized boolean bidValue(Long bidderId, double bidValue) {
+        bidders.add(bidderId);
         boolean result = false;
         if (isAlive && bidValue > 0 && bidValue > this.value) {
             System.out.format("AUCTION_ITEM: Bid of '%f' value for item {%d,%s} by bidder(%d) successful.", bidValue, this.id, this.itemName, bidderId);
