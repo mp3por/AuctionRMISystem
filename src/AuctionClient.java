@@ -59,10 +59,12 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                 case 2:
                                     try {
                                         long auctionId = Long.valueOf(input[1]);
-                                        String result = auctionHouseRemote.registerClientForAuction(auctionId, this);
-                                        System.out.println(result);
+                                        auctionHouseRemote.registerClientForAuction(auctionId, this);
+                                        System.out.println("You have successfully registerd for auction: " + auctionId);
                                     } catch (NumberFormatException e) {
                                         System.out.printf("The auctionID must consist of only NUMBERS.\n");
+                                    } catch (AuctionHouseException e){
+                                        System.out.println(e.getMessage());
                                     }
                                     break;
                                 default:
@@ -86,6 +88,8 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                         System.out.println(auctionItems);
                                     } catch (NumberFormatException e) {
                                         System.out.printf("The auctionID must consist of only NUMBERS.\n");
+                                    } catch (AuctionHouseException e){
+                                        System.out.println(e.getMessage());
                                     }
                                     break;
 
@@ -104,10 +108,12 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                             long itemId = Long.valueOf(input[2]);
                                             try {
                                                 double bidValue = Double.parseDouble(input[3]);
-                                                String result = auctionHouseRemote.bidForItem(this.id, auctionId, itemId, bidValue);
-                                                System.out.println(result);
+                                                boolean result = auctionHouseRemote.bidForItem(this.id, auctionId, itemId, bidValue);
+                                                System.out.println(result ? "You are the highest bidder!":"Your bid was less than the current value of the item!");
                                             } catch (NumberFormatException e) {
-                                                System.out.printf("The bidValue must be of type Double (E.x: 10.25).");
+                                                System.out.printf("The bidValue must be of type Double (E.x: 10.25, 25).");
+                                            } catch (AuctionHouseException e){
+                                                System.out.println(e.getMessage());
                                             }
                                         } catch (NumberFormatException e) {
                                             System.out.printf("The itemID must consist of only NUMBERS.");

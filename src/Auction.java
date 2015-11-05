@@ -93,27 +93,24 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
      * @throws RemoteException
      */
     @Override
-    public String bidForItem(long bidderId, long itemId, double bidValue) throws RemoteException {
+    public boolean bidForItem(long bidderId, long itemId, double bidValue) throws RemoteException, AuctionException {
 
         // check if the API is being abused
         if (!activeClients.containsKey(bidderId)) {
-            return "You have not registered as a client to this auction. Please register first!";
+            throw new AuctionException("You have not registered as a client to this auction. Please register first!");
         }
 
         // Get Item and bid
         IAuctionItem item = liveActionItems.get(itemId); // get Item from currently live AuctionItems
-        String result = "Undefined. Please contact administrator.";
         if (item != null) {
             // if item exists
             System.out.format("AUCTION: Client (-- %d --) is bidding '%f' for item(%d,%s) with current bid value:%f.\n", bidderId, bidValue, itemId, item.getItemName(), item.getValue());
-            result = item.bidValue(bidderId, bidValue) ? "You are the highest bidder now." : "Current bid value is more than you offer.";
+            return item.bidValue(bidderId, bidValue);
         } else {
             // if item DOES NOT exist
             System.out.format("AUCTION: Client(%d) is bidding '%f' for item(%d) that is not for sale.\n", bidderId, bidValue, itemId);
-            result = String.format("This item is no longer available for bidding or there is no Auction Item with id '%d'.", itemId);
+            throw new AuctionException(String.format("This item is no longer available for bidding or there is no Auction Item with id '%d'.", itemId));
         }
-
-        return result;
     }
 
     /**

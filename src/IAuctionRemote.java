@@ -10,7 +10,7 @@ public interface IAuctionRemote extends Remote {
 
     long createAndRegisterAuctionItem(long creatorId, String itemName, double value, Date closingDate) throws RemoteException, AuctionException;
 
-    String bidForItem(long bidderId, long itemId, double bidValue) throws RemoteException;
+    boolean bidForItem(long bidderId, long itemId, double bidValue) throws RemoteException, AuctionException;
 
     void registerClient(IAuctionClientRemote client) throws RemoteException;
 

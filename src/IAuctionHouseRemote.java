@@ -16,11 +16,11 @@ public interface IAuctionHouseRemote extends Remote {
 
     String getActiveAuctions() throws RemoteException;
 
-    String getAuctionLiveItems(long auctionId, long clientId) throws RemoteException;
+    String getAuctionLiveItems(long auctionId, long clientId) throws RemoteException, AuctionHouseException;
 
-    String registerClientForAuction(long auctionId, IAuctionClientRemote client) throws RemoteException;
+    void registerClientForAuction(long auctionId, IAuctionClientRemote client) throws RemoteException, AuctionHouseException;
 
-    String bidForItem(long bidderId, long auctionId, long itemId, double bidValue) throws RemoteException;
+    boolean bidForItem(long bidderId, long auctionId, long itemId, double bidValue) throws RemoteException, AuctionHouseException;
 
     long createAndRegisterAuctionItem(long creatorId, long auctionId, String itemName, double value, Date endDate) throws RemoteException, AuctionHouseException;
 }

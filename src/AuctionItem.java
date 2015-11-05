@@ -53,7 +53,7 @@ public class AuctionItem implements IAuctionItem {
         }
         if (startValue <= ITEM_MIN_START_VALUE) {
             System.out.println("AUCTION_ITEM: startValue(" + startValue + ") < ITEM_MIN_START_VALUE (10)");
-            String m = String.format("Invalid startValue ( %f )! The initial item value must be above %f.\n", startValue);
+            String m = String.format("Invalid startValue ( %f )! The initial item value must be above %f.\n", startValue, ITEM_MIN_START_VALUE);
             throw new AuctionItemNegativeStartValueException(m, startValue);
         }
         if (itemName.length() == ITEM_NAME_MIN_LENGTH) {
