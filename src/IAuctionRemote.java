@@ -19,4 +19,6 @@ public interface IAuctionRemote extends Remote {
     String getName() throws RemoteException;
 
     long getId() throws RemoteException;
+
+    String print() throws RemoteException;
 }

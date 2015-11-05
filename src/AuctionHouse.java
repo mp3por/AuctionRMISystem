@@ -63,7 +63,7 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
         for (long key : activeAuctions.keySet()) {
             IAuctionRemote iAuctionRemote = activeAuctions.get(key);
             try {
-                b.append("\t* " + iAuctionRemote.getId() + ":" + iAuctionRemote.getName() + "\n");
+                b.append("\t* " + iAuctionRemote.print() + "\n");
             } catch (RemoteException e) {
                 // This Auction is not accessible any more so lets remove it.
                 activeAuctions.remove(key);

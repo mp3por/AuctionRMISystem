@@ -190,6 +190,11 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
         return id;
     }
 
+    @Override
+    public String print() throws RemoteException{
+        return this.id + " : " + this.name;
+    }
+
     /**
      * A wrapper for finished Auction Items so that they unregister themselves after a specific amount of time
      */
