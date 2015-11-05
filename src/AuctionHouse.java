@@ -20,6 +20,12 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
         System.out.printf("AUCTION_HOUSE: Created.\n");
     }
 
+    /**
+     * Registers an Auction to this AuctionHouse which starts to manage the Auction
+     * @param auction The Auction that is trying to get registered
+     * @return The auction ID assigned by the AuctionHouse
+     * @throws RemoteException
+     */
     @Override
     public long registerAuction(IAuctionRemote auction) throws RemoteException {
         long auctionId = nextAuctionId++;
@@ -29,12 +35,22 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
         return auctionId;
     }
 
+    /**
+     * Unregisters the Auction from the AuctionHouse
+     * @param auctionId The id of the Auction
+     */
     @Override
     public void unregisterAuction(long auctionId) {
         System.out.printf("AUCTION_HOUSE: unregistering auction with ID: %d.\n", auctionId);
         activeAuctions.remove(auctionId);
     }
 
+    /**
+     * Registers a client to this AuctionHouse
+     * @param client The client that wants to get registered in this AuctionHouse
+     * @return The client ID assigned by the AuctionHouse
+     * @throws RemoteException
+     */
     @Override
     public long registerClient(IAuctionClientRemote client) throws RemoteException {
         long clientId = this.nextClientId++;
@@ -44,6 +60,11 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
         return clientId;
     }
 
+    /**
+     * Unregisteres a client from this AuctionHouse
+     * @param clientId The id of the Client
+     * @throws RemoteException
+     */
     @Override
     public void unregisterClient(long clientId) throws RemoteException {
         System.out.printf("AUCTION_HOUSE: Unregistering client with ID: %d.\n", clientId);
@@ -57,6 +78,11 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
         }
     }
 
+    /**
+     *  Can be used by the Client to view currently available Auctions
+     * @return String representation of all currently available Auctions (not sorted)
+     * @throws RemoteException
+     */
     @Override
     public String getActiveAuctions() throws RemoteException {
         StringBuilder b = new StringBuilder();
@@ -73,6 +99,14 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
         return b.toString();
     }
 
+    /**
+     * Can be used by the Client to view active AuctionItems in particular Auctions
+     * @param auctionId The particular Auction ID
+     * @param clientId The Client's ID
+     * @return String representation of all currently active AuctionItems in the specified Auction
+     * @throws RemoteException
+     * @throws AuctionHouseException
+     */
     @Override
     public String getAuctionLiveItems(long auctionId, long clientId) throws RemoteException, AuctionHouseException {
         IAuctionRemote auction = activeAuctions.get(auctionId);
@@ -89,6 +123,14 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
         }
     }
 
+    /**
+     * Can be used by the Client to register to an Auction allowing him to bid for active AuctionItems or create new
+     * AuctionItems in the specified Auction
+     * @param auctionId The ID of the Auction
+     * @param client The Client
+     * @throws RemoteException
+     * @throws AuctionHouseException
+     */
     @Override
     public void registerClientForAuction(long auctionId, IAuctionClientRemote client) throws RemoteException, AuctionHouseException {
         IAuctionRemote auction = activeAuctions.get(auctionId);
@@ -103,6 +145,16 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
         }
     }
 
+    /**
+     * Can be used by the Client to bid for an AuctionItem in a particular Auction
+     * @param bidderId The id of the bidder
+     * @param auctionId The id of the Auction where the AuctionItem is
+     * @param itemId The id of an AuctionItem in the specified Auction
+     * @param bidValue The value of the bid
+     * @return
+     * @throws RemoteException
+     * @throws AuctionHouseException
+     */
     @Override
     public boolean bidForItem(long bidderId, long auctionId, long itemId, double bidValue) throws RemoteException, AuctionHouseException {
         IAuctionRemote auction = activeAuctions.get(auctionId);
@@ -119,6 +171,17 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
         }
     }
 
+    /**
+     * Can be used by the Client to create new AuctionItems in a particular Auction
+     * @param creatorId The creater ID
+     * @param auctionId The particular Auction ID
+     * @param itemName The name of the new Item
+     * @param value The starting value of the new AuctionItem
+     * @param endDate The end of the AuctionItem after which no more bids are allowed (format dd/MM/yyyy-hh:mm:ss)
+     * @return The ID of the new AuctionItem
+     * @throws RemoteException
+     * @throws AuctionHouseException
+     */
     @Override
     public long createAndRegisterAuctionItem(long creatorId, long auctionId, String itemName, double value, Date endDate) throws RemoteException, AuctionHouseException {
         IAuctionRemote auction = activeAuctions.get(auctionId);
