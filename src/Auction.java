@@ -54,28 +54,24 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
      * @throws RemoteException
      */
     @Override
-    public String createAndRegisterAuctionItem(long creatorId, String itemName, double value, Date closingDate) throws RemoteException {
-        String result = "";
-        AuctionItem i = null;
+    public long createAndRegisterAuctionItem(long creatorId, String itemName, double value, Date closingDate) throws RemoteException, AuctionException {
         try {
             long newAuctionItemId = auctionItemIds++;
-            i = new AuctionItem(newAuctionItemId,creatorId, this, itemName, value, closingDate);
-            registerAuctionItem(newAuctionItemId,i);
+            AuctionItem i = new AuctionItem(newAuctionItemId, creatorId, this, itemName, value, closingDate);
+            registerAuctionItem(newAuctionItemId, i);
 
             System.out.format("AUCTION: Client (-- %d --) created and registered a new AuctionItem {%d,%s,%f,%s}.\n", creatorId, newAuctionItemId, itemName, value, formatter.format(closingDate));
-            result = "Created new AuctionItem with id:" + newAuctionItemId;
+            return newAuctionItemId;
         } catch (AuctionItem.AuctionItemNegativeStartValueException e) {
-            result = e.getMessage();
             System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+            throw new AuctionException(e.getMessage());
         } catch (AuctionItem.AuctionItemInvalidEndDateException e) {
-            result = e.getMessage();
             System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+            throw new AuctionException(e.getMessage());
         } catch (AuctionItem.AuctionItemInvalidItemNameException e) {
-            result = e.getMessage();
             System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+            throw new AuctionException(e.getMessage());
         }
-
-        return result;
     }
 
     /**
@@ -83,7 +79,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
      *
      * @param item
      */
-    public void registerAuctionItem(long auctionItemId,IAuctionItem item) {
+    public void registerAuctionItem(long auctionItemId, IAuctionItem item) {
         liveActionItems.put(auctionItemId, item);
     }
 
@@ -129,7 +125,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     @Override
     public void registerClient(IAuctionClientRemote client) throws RemoteException {
         long clientId = client.getId();
-        System.out.format("AUCTION: Registering client: %s.\n", clientId );
+        System.out.format("AUCTION: Registering client: %s.\n", clientId);
         activeClients.put(clientId, client);
     }
 
@@ -174,7 +170,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
                 System.out.format("AUCTION: Client (-- %d --) notified of finished AuctionItem '%s'.\n", key, finishedAuctionItem.getItemName());
             } catch (RemoteException e) {
                 activeClients.remove(key); // client no longer reachable.
-            } catch (NullPointerException e){
+            } catch (NullPointerException e) {
                 // client unregistered -> do nothing
             }
         }
@@ -191,7 +187,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     }
 
     @Override
-    public String print() throws RemoteException{
+    public String print() throws RemoteException {
         return this.id + " : " + this.name;
     }
 

@@ -8,7 +8,7 @@ import java.util.Date;
 public interface IAuctionRemote extends Remote {
     String getAuctionLiveItems(long clientId) throws RemoteException;
 
-    String createAndRegisterAuctionItem(long creatorId, String itemName, double value, Date closingDate) throws RemoteException;
+    long createAndRegisterAuctionItem(long creatorId, String itemName, double value, Date closingDate) throws RemoteException, AuctionException;
 
     String bidForItem(long bidderId, long itemId, double bidValue) throws RemoteException;
 

@@ -6,13 +6,12 @@ import java.util.Date;
  * Created by vbk20 on 01/11/2015.
  */
 public interface IAuctionHouseRemote extends Remote {
+    long registerAuction(IAuctionRemote auction) throws RemoteException;
 
-    // register Auctions
-    long registerAuction(IAuctionRemote auction)throws RemoteException;;
-    void unregisterAuction(long auctionId) throws RemoteException;;
+    void unregisterAuction(long auctionId) throws RemoteException;
 
-    // register Clients
     long registerClient(IAuctionClientRemote client) throws RemoteException;
+
     void unregisterClient(long clientId) throws RemoteException;
 
     String getActiveAuctions() throws RemoteException;
@@ -23,5 +22,5 @@ public interface IAuctionHouseRemote extends Remote {
 
     String bidForItem(long bidderId, long auctionId, long itemId, double bidValue) throws RemoteException;
 
-    String createAndRegisterAuctionItem(long creatorId, long auctionId, String itemName, double value, Date endDate) throws RemoteException;
+    long createAndRegisterAuctionItem(long creatorId, long auctionId, String itemName, double value, Date endDate) throws RemoteException, AuctionHouseException;
 }

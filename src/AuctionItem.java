@@ -57,7 +57,7 @@ public class AuctionItem implements IAuctionItem {
             throw new AuctionItemNegativeStartValueException(m, startValue);
         }
         if (itemName.length() == ITEM_NAME_MIN_LENGTH) {
-            String m = String.format("Invalid itemName! The name of the Item must be more than 0 characters long.\n");
+            String m = String.format("Invalid itemName! The name of the Item must be more than %d characters long.\n", ITEM_NAME_MIN_LENGTH);
             throw new AuctionItemInvalidItemNameException(m, itemName);
         }
 
@@ -173,7 +173,7 @@ public class AuctionItem implements IAuctionItem {
     }
 
     public class AuctionItemInvalidItemNameException extends Exception {
-        private static final String shortName = "StartName Exception:%s.\n";
+        private static final String shortName = "Name Exception:%s.\n";
         private final String clientStartValue;
 
         public AuctionItemInvalidItemNameException(String message, String clientStartValue) {
@@ -187,7 +187,7 @@ public class AuctionItem implements IAuctionItem {
     }
 
     public class AuctionItemInvalidEndDateException extends Exception {
-        private static final String shortName = "StartDate Exception:%s.\n";
+        private static final String shortName = "endDate Exception:%s.\n";
         private final java.util.Date clientStartValue;
         private final DateFormat formatter;
 

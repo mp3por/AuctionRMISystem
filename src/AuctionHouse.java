@@ -21,7 +21,7 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
     }
 
     @Override
-    public long registerAuction(IAuctionRemote auction) {
+    public long registerAuction(IAuctionRemote auction) throws RemoteException {
         long auctionId = nextAuctionId++;
         System.out.printf("AUCTION_HOUSE: registering auction with ID: %d.\n", auctionId);
         activeAuctions.put(auctionId, auction);
@@ -58,7 +58,7 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
     }
 
     @Override
-    public String getActiveAuctions() {
+    public String getActiveAuctions() throws RemoteException {
         StringBuilder b = new StringBuilder();
         for (long key : activeAuctions.keySet()) {
             IAuctionRemote iAuctionRemote = activeAuctions.get(key);
@@ -74,7 +74,7 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
     }
 
     @Override
-    public String getAuctionLiveItems(long auctionId, long clientId) {
+    public String getAuctionLiveItems(long auctionId, long clientId) throws RemoteException{
         IAuctionRemote auction = activeAuctions.get(auctionId);
         String result = "";
         if (auction != null) {
@@ -125,18 +125,19 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
     }
 
     @Override
-    public String createAndRegisterAuctionItem(long creatorId, long auctionId, String itemName, double value, Date endDate) throws RemoteException {
+    public long createAndRegisterAuctionItem(long creatorId, long auctionId, String itemName, double value, Date endDate) throws RemoteException, AuctionHouseException {
         IAuctionRemote auction = activeAuctions.get(auctionId);
-        String result = "";
         if (auction != null) {
             try {
-                result = auction.createAndRegisterAuctionItem(creatorId, itemName, value, endDate);
+                return auction.createAndRegisterAuctionItem(creatorId, itemName, value, endDate);
             } catch (RemoteException e) {
-                result = String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId);
+                throw new AuctionHouseException(String.format("Apologies! The Auction (%d) you are looking for is not longer available.\n", auctionId));
+            } catch (AuctionException e) {
+                System.out.println("EEEEEEEEEEEEEEEEEEEEEEEEEEEE EEEEEEEEEEEEEEEEEEEEEEEEE");
+                throw new AuctionHouseException(e.getMessage());
             }
         } else {
-            result = String.format("Auction with id (-- %d --) does not exist.\n", auctionId);
+            throw new AuctionHouseException(String.format("Auction with id (-- %d --) does not exist.\n", auctionId));
         }
-        return result;
     }
 }
