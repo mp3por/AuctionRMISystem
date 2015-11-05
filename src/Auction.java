@@ -35,7 +35,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     /**
      * Can be used to see all active items in the Auction
      * @param clientId The id of the client that requested to see active AuctionItems
-     * @return
+     * @return String representation of all currently active AuctionItems
      * @throws RemoteException
      */
     @Override
@@ -56,7 +56,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
      * @param itemName    the item name
      * @param value       the item initial value
      * @param closingDate the item end time
-     * @return String representing the result. If the creation was successful it contains the created Auction Item ID for client's reference
+     * @return the ID of the new AuctionItem
      * @throws RemoteException
      */
     @Override
@@ -95,7 +95,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
      * @param bidderId the id of the bidder
      * @param itemId   the id of the item
      * @param bidValue the bid value
-     * @return result holds the String representation of what happened so that the client knows
+     * @return boolean if the bid was successful or not
      * @throws RemoteException
      */
     @Override
