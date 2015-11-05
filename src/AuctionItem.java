@@ -31,17 +31,6 @@ public class AuctionItem implements IAuctionItem {
     private boolean isAlive;
     private long timeAlive;
 
-//    public static AuctionItem createAuctionItem(long creatorId, Auction auction, String itemName, double startValue, Date endDate) {
-//        AuctionItem item = null;
-//        System.out.println("endDate.after(now)?:" + endDate.after(new Date()));
-//        Date now = new Date();
-//        if (endDate.after(now)) {
-//            long timeAlive = endDate.getTime() - now.getTime();
-//            item = new AuctionItem(creatorId, auction, itemName, startValue, endDate,timeAlive);
-//        }
-//        return item;
-//    }
-
     public AuctionItem(long id, long creatorId, Auction auction, String itemName, double startValue, Date endDate) throws AuctionItemNegativeStartValueException, AuctionItemInvalidEndDateException, AuctionItemInvalidItemNameException {
 
         // Error checking

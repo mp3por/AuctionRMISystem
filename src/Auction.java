@@ -32,6 +32,12 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
         System.out.format("AUCTION: created.\n");
     }
 
+    /**
+     * Can be used to see all active items in the Auction
+     * @param clientId The id of the client that requested to see active AuctionItems
+     * @return
+     * @throws RemoteException
+     */
     @Override
     public String getAuctionLiveItems(long clientId) throws RemoteException {
         System.out.format("AUCTION: Client (%d) requested auctionItems.\n", clientId);
@@ -77,7 +83,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     /**
      * Registers an Auction Item to this Auction
      *
-     * @param item
+     * @param item The item that you want to register
      */
     public void registerAuctionItem(long auctionItemId, IAuctionItem item) {
         liveActionItems.put(auctionItemId, item);
@@ -116,7 +122,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     /**
      * Register as a participant in this Auction
      *
-     * @param client
+     * @param client The client that wants to get registered
      * @throws RemoteException
      */
     @Override
