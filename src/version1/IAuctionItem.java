@@ -1,3 +1,5 @@
+package version1;
+
 import java.io.Serializable;
 import java.util.Date;
 

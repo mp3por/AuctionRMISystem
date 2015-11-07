@@ -1,3 +1,5 @@
+package version1;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -9,8 +11,8 @@ public class Utils {
     public static final int AUCTION_SERVER_RMI_PORT = 2001;
     public static final int AUCTION_HOUSE_SERVER_RMI_PORT = 1099;
 
-    public static final String AUCTION_REGISTRY_NAME = "//localhost/AuctionServer/%s";
-    public static final String AUCTION_HOUSE_REGISTRY_NAME = "//localhost/AuctionHouseServer";
+    public static final String AUCTION_REGISTRY_NAME = "//localhost/version1.AuctionServer/%s";
+    public static final String AUCTION_HOUSE_REGISTRY_NAME = "//localhost/version1.AuctionHouseServer";
 
     public static final long DEFAULT_BIDDER_ID = 0;
     public static final long DEFAULT_LAST_BIDDER_ID = -1;

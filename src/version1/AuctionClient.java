@@ -1,4 +1,5 @@
-import java.rmi.Naming;
+package version1;
+
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -76,7 +77,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                         case "--list-auction-items":
                             switch (input.length) {
                                 case 1:
-                                    System.out.printf("Available Auctions in the Auction House:\n");
+                                    System.out.printf("Available Auctions in the version1.Auction House:\n");
                                     String result = auctionHouseRemote.getActiveAuctions();
                                     System.out.println(result.length() == 0 ? "\t NO ACTIVE AUCTIONS" : result);
                                     break;
@@ -168,7 +169,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
             } catch (InterruptedException e) {
                 ; // ignored
             } catch (RemoteException e) {
-                System.out.println("Auction House is unavailable.");
+                System.out.println("version1.Auction House is unavailable.");
                 e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -186,11 +187,11 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
     private void printHelp() {
         System.out.printf("Hello,\nAvailable commands:\n" +
                 "\t* --l: Prints all available Auctions with their name and Ids\n" +
-                "\t* --l 'auctionId': Prints all available Auction Items (name + id) in the Auction with 'id'\n" +
-                "\t* --c 'auctionId' 'itemName' 'startValue' 'endDate': Creates a new Auction Item with the specified details\n" +
-                "\t* --b 'auctionId' 'itemId' 'bidValue':  Bids for that particular Auction Item in that particular Auction\n" +
-                "\t* --r 'auctionId': Registers you as a client for this particular Auction so that you can bid and/or create Auction Items\n" +
-                "\nRemember that you have to register (--r command) in an Auction before you can do bid for Items or create new Items in this Auction.\n");
+                "\t* --l 'auctionId': Prints all available version1.Auction Items (name + id) in the version1.Auction with 'id'\n" +
+                "\t* --c 'auctionId' 'itemName' 'startValue' 'endDate': Creates a new version1.Auction Item with the specified details\n" +
+                "\t* --b 'auctionId' 'itemId' 'bidValue':  Bids for that particular version1.Auction Item in that particular version1.Auction\n" +
+                "\t* --r 'auctionId': Registers you as a client for this particular version1.Auction so that you can bid and/or create version1.Auction Items\n" +
+                "\nRemember that you have to register (--r command) in an version1.Auction before you can do bid for Items or create new Items in this version1.Auction.\n");
     }
 
     public static void main(String[] args) {

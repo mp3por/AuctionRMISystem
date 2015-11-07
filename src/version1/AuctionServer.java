@@ -1,3 +1,5 @@
+package version1;
+
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Date;
@@ -14,11 +16,11 @@ public class AuctionServer {
             IAuctionHouseRemote auctionHouseRemote = (IAuctionHouseRemote) auctionHouseServerRegistry.lookup(Utils.AUCTION_HOUSE_REGISTRY_NAME);
             IAuctionRemote auction = new Auction(auctionName, auctionHouseRemote);
 
-//            System.out.format("Auction created(%s). Now lets register it.\n", auction);
-//            String auctionRegistryName = String.format(Utils.AUCTION_REGISTRY_NAME, auctionName);
-//            Registry auctionServerRegistry = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT);
+//            System.out.format("version1.Auction created(%s). Now lets register it.\n", auction);
+//            String auctionRegistryName = String.format(version1.Utils.AUCTION_REGISTRY_NAME, auctionName);
+//            Registry auctionServerRegistry = LocateRegistry.getRegistry("localhost", version1.Utils.AUCTION_SERVER_RMI_PORT);
 //            auctionServerRegistry.rebind(auctionRegistryName, auction);
-//            System.out.println("Auction registered to the global AUCTION_SERVER RMI registry.\n");
+//            System.out.println("version1.Auction registered to the global AUCTION_SERVER RMI registry.\n");
 
             System.out.println("Adding initial bids.\n");
             Date now = new Date();
@@ -29,7 +31,7 @@ public class AuctionServer {
 
             System.out.println("---------------------------- AUCTION STARTED -----------------------------\n");
 //        } catch (AlreadyBoundException e) {
-//            System.out.printf("There exist an Auction with this name. Please try a different name.\n");
+//            System.out.printf("There exist an version1.Auction with this name. Please try a different name.\n");
 //            e.printStackTrace();
         } catch (Exception e) {
             System.out.format("export exception - %s\n", e.getMessage());

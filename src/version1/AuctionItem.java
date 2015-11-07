@@ -1,5 +1,6 @@
+package version1;
+
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -147,7 +148,7 @@ public class AuctionItem implements IAuctionItem {
 
     @Override
     public String toString() {
-        return "AuctionItem{" +
+        return "version1.AuctionItem{" +
                 "id=" + id +
                 ", creatorId=" + creatorId +
                 ", lastBidder=" + lastBidder +
