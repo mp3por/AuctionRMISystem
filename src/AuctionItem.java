@@ -53,7 +53,6 @@ public class AuctionItem implements IAuctionItem {
             throw new AuctionItemInvalidEndDateException(m, endDate, Utils.formatter);
         }
         if (startValue <= ITEM_MIN_START_VALUE) {
-            System.out.println("AUCTION_ITEM: startValue(" + startValue + ") < ITEM_MIN_START_VALUE (10)");
             String m = String.format("Invalid startValue ( %f )! The initial item value must be above %f.\n", startValue, ITEM_MIN_START_VALUE);
             throw new AuctionItemNegativeStartValueException(m, startValue);
         }
@@ -145,7 +144,6 @@ public class AuctionItem implements IAuctionItem {
      * Stops any bidding.
      */
     private void stopBids() {
-        System.out.format("AUCTION_ITEM: Item {%d,%s} bidding closed.\n", this.id, this.itemName);
         isAlive = false;
         aliveTimer = null;
     }
@@ -162,7 +160,6 @@ public class AuctionItem implements IAuctionItem {
         bidders.add(bidderId);
         boolean result = false;
         if (isAlive && bidValue > 0 && bidValue > this.value) {
-            System.out.format("AUCTION_ITEM: Bid of '%f' value for item {%d,%s} by bidder(%d) successful.", bidValue, this.id, this.itemName, bidderId);
             this.value = bidValue;
             this.lastBidder = bidderId;
             result = true;

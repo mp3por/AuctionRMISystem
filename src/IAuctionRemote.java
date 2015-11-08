@@ -10,8 +10,6 @@ import java.util.logging.Level;
 public interface IAuctionRemote extends Remote {
     String getAuctionLiveItems(long clientId) throws RemoteException;
 
-    void setCommandLineLoggingLevel(long requesterId, Level level) throws RemoteException;
-
     long createAndRegisterAuctionItem(long creatorId, String itemName, double value, Date closingDate) throws RemoteException, AuctionException;
 
     boolean bidForItem(long bidderId, long itemId, double bidValue) throws RemoteException, AuctionException;
