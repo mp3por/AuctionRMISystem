@@ -2,7 +2,6 @@ import java.io.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by vbk20 on 29/10/2015.
@@ -95,7 +94,10 @@ public class AuctionServer {
                                             String[] inputs = line.split(" ");
                                             result.add(inputs);
                                         }
-                                        auction.createAndRegisterAuctionItems(-1111, result);
+                                        auction.bulkCreateAndRegisterAuctionItems(-1111, result);
+                                    } catch (NumberFormatException e){
+                                        e.printStackTrace();
+                                        auction.rollBackLastBulkAdd(this.id);
                                     }
                                     break;
                                 default:

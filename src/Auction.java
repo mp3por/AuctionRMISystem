@@ -30,6 +30,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     private Map<Long, IAuctionClientRemote> activeClients;
     private String name;
     private final Lock liveAuctionsMapLock = new ReentrantLock();
+    private List<Long> lastBulkAddition;
 
     // Logging
     private Logger LOGGER;
@@ -85,10 +86,34 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
         }
     }
 
-    public void createAndRegisterAuctionItems(long requesterId, List<String[]> items) throws AuctionException {
+    /**
+     * Can be used by server to remove all AuctionItems previously added by bulkCreateAndRegisterAuctionItems
+     * Only the server can call this method
+     * @param requesterId The requester ID
+     * @throws AuctionException
+     */
+    public void rollBackLastBulkAdd(long requesterId) throws AuctionException {
+        if( requesterId == SERVER_ID){
+            synchronized (liveAuctionsMapLock){
+                lastBulkAddition.forEach(liveActionItems::remove);
+            }
+        }
+        throw new AuctionException("You have no access to this method!\n");
+    }
+
+    /**
+     * Can be used to create multiple AuctionItems at once
+     *
+     * @param requesterId The requester id
+     * @param items Items properties ( id, creatorId, itemName, lastBidderId, startValue, value, timeleft )
+     * @throws AuctionException
+     * @throws NumberFormatException
+     */
+    public void bulkCreateAndRegisterAuctionItems(long requesterId, List<String[]> items) throws AuctionException, NumberFormatException {
         // check for access
         if (requesterId == SERVER_ID) {
             Map<Long, IAuctionItem> itemsMap = new ConcurrentHashMap<>();
+            lastBulkAddition = new ArrayList<>();
             for (String[] itemProperties : items) {
                 long itemId = Long.valueOf(itemProperties[0]);
                 long creatorId = Long.valueOf(itemProperties[1]);
@@ -101,8 +126,9 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
                 // create and add new AuctionItem
                 IAuctionItem i = AuctionItem.createAuctionItem(1000, this, itemId, creatorId, itemName, lastBidder, startValue, value, timeLeft);
                 itemsMap.put(itemId, i);
+                lastBulkAddition.add(itemId);
 
-                if(itemId >= auctionItemIds){
+                if (itemId >= auctionItemIds) {
                     auctionItemIds = itemId + 1; // to make sure ids do not repeat
                 }
 
