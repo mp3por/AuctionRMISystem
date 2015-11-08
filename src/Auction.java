@@ -1,9 +1,15 @@
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.text.DateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by vbk20 on 29/10/2015.
@@ -11,7 +17,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     // static finals
     private static final int AUCTION_ITEM_EXPIRE_TIME_MILISEC = 120000; // 120s expiration time
-    private static final DateFormat formatter = Utils.formatter;
+    private static final long TESTER_ID = -100l; // the ID for a tester
+    private static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+    private static final long SERVER_ID = -1111;
+
     // static
     private static long auctionItemIds = 0;
     private static long clientIds = 0;
@@ -20,31 +29,97 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     private Map<Long, IAuctionItem> finishedItems;
     private Map<Long, IAuctionClientRemote> activeClients;
     private String name;
+    private final Lock liveAuctionsMapLock = new ReentrantLock();
 
-    public Auction(String auctionName) throws RemoteException, NotBoundException {
+    // Logging
+    private Logger LOGGER;
+    private FileHandler fh;
+    private ConsoleHandler cs;
+
+    public Auction(String auctionName) throws IOException, NotBoundException {
         // initialize local variables
         liveActionItems = new ConcurrentHashMap<Long, IAuctionItem>();
         finishedItems = new ConcurrentHashMap<Long, IAuctionItem>();
         activeClients = new ConcurrentHashMap<Long, IAuctionClientRemote>();
         this.name = auctionName;
-        System.out.format("AUCTION: created.\n");
+
+        this.LOGGER = Logger.getLogger(Auction.class.getName());
+        LOGGER.setUseParentHandlers(false);
+        this.fh = new FileHandler("log-Auction.txt", true);
+        this.cs = new ConsoleHandler();
+        LOGGER.addHandler(fh);
+        LOGGER.addHandler(cs);
+        LOGGER.setLevel(Level.INFO);
+
+//        System.out.format("AUCTION: created.\n");
+        LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: created.\n");
     }
+
 
     /**
      * Can be used to see all active items in the Auction
+     *
      * @param clientId The id of the client that requested to see active AuctionItems
      * @return String representation of all currently active AuctionItems
      * @throws RemoteException
      */
     @Override
     public String getAuctionLiveItems(long clientId) throws RemoteException {
-        System.out.format("AUCTION: Client (%d) requested auctionItems.\n", clientId);
+//        System.out.format("AUCTION: Client (%d) requested auctionItems.\n", clientId);
+        LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Client {0} requested auctionItems.\n", clientId);
         StringBuilder b = new StringBuilder();
-        for (long key : liveActionItems.keySet()) {
-            IAuctionItem item = liveActionItems.get(key);
-            b.append("\t* " + key + " -> " + item.getItemName() + ", value:" + item.getValue() + ", endTime: " + formatter.format(item.getEndDate()) + "\n");
+        synchronized (liveAuctionsMapLock) {
+            for (long key : liveActionItems.keySet()) {
+                IAuctionItem item = liveActionItems.get(key);
+                b.append("\t* " + key + " -> " + item.getItemName() + ", value:" + item.getValue() + ", endTime: " + Utils.formatter.format(item.getEndDate()) + "\n");
+            }
         }
         return b.toString();
+    }
+
+    @Override
+    public void setCommandLineLoggingLevel(long requesterId, Level level) throws RemoteException {
+        if (requesterId == TESTER_ID) {
+            LOGGER.log(Level.SEVERE, "Client (-- {0} --) changed the CommandLineLogginLevel to {1}", new Object[]{requesterId, level});
+            cs.setLevel(level);
+        }
+    }
+
+    public void createAndRegisterAuctionItems(long requesterId, List<String[]> items) throws AuctionException {
+        // check for access
+        if (requesterId == SERVER_ID) {
+            Map<Long, IAuctionItem> itemsMap = new ConcurrentHashMap<>();
+            for (String[] itemProperties : items) {
+                long itemId = Long.valueOf(itemProperties[0]);
+                long creatorId = Long.valueOf(itemProperties[1]);
+                String itemName = itemProperties[2];
+                long lastBidder = Long.valueOf(itemProperties[3]);
+                double startValue = Double.valueOf(itemProperties[4]);
+                double value = Double.valueOf(itemProperties[5]);
+                long timeLeft = Long.valueOf(itemProperties[6]);
+
+                // create and add new AuctionItem
+                IAuctionItem i = AuctionItem.createAuctionItem(1000, this, itemId, creatorId, itemName, lastBidder, startValue, value, timeLeft);
+                itemsMap.put(itemId, i);
+
+                if(itemId >= auctionItemIds){
+                    auctionItemIds = itemId + 1; // to make sure ids do not repeat
+                }
+
+                LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Client (-- {0} --) created and registered a new AuctionItem ({1},{2},{3},{4}).\n", new Object[]{
+                        "SERVER",
+                        itemId,
+                        itemName,
+                        value,
+                        Utils.formatter.format(new Date(new Date().getTime() + timeLeft))});
+            }
+
+            // add everthing in one go
+            synchronized (liveAuctionsMapLock) {
+                liveActionItems.putAll(itemsMap);
+            }
+        }
+        throw new AuctionException("You have no access to this method!\n");
     }
 
     /**
@@ -61,30 +136,26 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     public long createAndRegisterAuctionItem(long creatorId, String itemName, double value, Date closingDate) throws RemoteException, AuctionException {
         try {
             long newAuctionItemId = auctionItemIds++;
-            AuctionItem i = new AuctionItem(newAuctionItemId, creatorId, this, itemName, value, closingDate);
-            registerAuctionItem(newAuctionItemId, i);
-
-            System.out.format("AUCTION: Client (-- %d --) created and registered a new AuctionItem {%d,%s,%f,%s}.\n", creatorId, newAuctionItemId, itemName, value, formatter.format(closingDate));
+            IAuctionItem i = new AuctionItem(newAuctionItemId, creatorId, this, itemName, value, closingDate);
+            synchronized (liveAuctionsMapLock) {
+                liveActionItems.put(newAuctionItemId, i);
+            }
+//            System.out.format("AUCTION: Client (-- %d --) created and registered a new AuctionItem {%d,%s,%f,%s}.\n", creatorId, newAuctionItemId, itemName, value, Utils.formatter.format(closingDate));
+            LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Client (-- {0} --) created and registered a new AuctionItem ({1},{2},{3},{4}).\n", new Object[]{creatorId, newAuctionItemId, itemName, value, Utils.formatter.format(closingDate)});
             return newAuctionItemId;
         } catch (AuctionItem.AuctionItemNegativeStartValueException e) {
-            System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+//            System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+            LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Client (-- {0} --) wanted to create invalid AuctionItem. Error:{1}.\n", new Object[]{creatorId, e.getShortName()});
             throw new AuctionException(e.getMessage());
         } catch (AuctionItem.AuctionItemInvalidEndDateException e) {
-            System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+//            System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+            LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Client (-- {0} --) wanted to create invalid AuctionItem. Error:{1}.\n", new Object[]{creatorId, e.getShortName()});
             throw new AuctionException(e.getMessage());
         } catch (AuctionItem.AuctionItemInvalidItemNameException e) {
-            System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+//            System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+            LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Client (-- {0} --) wanted to create invalid AuctionItem. Error:{1}.\n", new Object[]{creatorId, e.getShortName()});
             throw new AuctionException(e.getMessage());
         }
-    }
-
-    /**
-     * Registers an AuctionItem to this Auction
-     *
-     * @param item The item that you want to register
-     */
-    public void registerAuctionItem(long auctionItemId, IAuctionItem item) {
-        liveActionItems.put(auctionItemId, item);
     }
 
     /**
@@ -105,14 +176,19 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
         }
 
         // Get Item and bid
-        IAuctionItem item = liveActionItems.get(itemId); // get Item from currently live AuctionItems
+        IAuctionItem item = null;
+        synchronized (liveAuctionsMapLock) {
+            item = liveActionItems.get(itemId); // get Item from currently live AuctionItems
+        }
         if (item != null) {
             // if item exists
-            System.out.format("AUCTION: Client (-- %d --) is bidding '%f' for item(%d,%s) with current bid value:%f.\n", bidderId, bidValue, itemId, item.getItemName(), item.getValue());
+//            System.out.format("AUCTION: Client (-- %d --) is bidding '%f' for item(%d,%s) with current bid value:%f.\n", bidderId, bidValue, itemId, item.getItemName(), item.getValue());
+            LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Client (-- {0} --) is bidding '{1}' for item({2},{3}) with current bid value:{4}.\n", new Object[]{bidderId, bidValue, itemId, item.getItemName(), item.getValue()});
             return item.bidValue(bidderId, bidValue);
         } else {
             // if item DOES NOT exist
-            System.out.format("AUCTION: Client(%d) is bidding '%f' for item(%d) that is not for sale.\n", bidderId, bidValue, itemId);
+//            System.out.format("AUCTION: Client (-- %d --) is bidding '%f' for item(%d) that is not for sale.\n", bidderId, bidValue, itemId);
+            LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Client (-- {0} --) is bidding '{1}' for item({2}) that is not for sale.\n", new Object[]{bidderId, bidValue, itemId});
             throw new AuctionException(String.format("This item is no longer available for bidding or there is no Auction Item with id '%d'.", itemId));
         }
     }
@@ -128,7 +204,8 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
         long newClientId = clientIds++;
         activeClients.put(newClientId, client);
 
-        System.out.format("AUCTION: Registering client: %s.\n", newClientId);
+//        System.out.format("AUCTION: Registering client: %s.\n", newClientId);
+        LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Registering client:{0}.\n", newClientId);
         return newClientId;
     }
 
@@ -140,7 +217,8 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
      */
     @Override
     public void unregisterClient(long clientId) throws RemoteException {
-        System.out.format("AUCTION: UNregistering client: %d.\n", clientId);
+//        System.out.format("AUCTION: UNregistering client: %d.\n", clientId);
+        LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: UNregistering client: {0}.\n", clientId);
         activeClients.remove(clientId);
     }
 
@@ -149,20 +227,28 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
      * Auction Items and notifies all clients with the result.
      *
      * @param finishedAuctionItem
+     * @param bidders
      */
-    public void itemCompleteCallback(IAuctionItem finishedAuctionItem, List<Long> bidders) {
-        System.out.format("AUCTION: Auction notified that item {ID: %d,name: %s,finalValue: %f, lastBidder:  %d} has finished.\n",
+    public void itemCompleteCallback(long finishedItemId, IAuctionItem finishedAuctionItem, Set<Long> bidders) {
+//        System.out.format("AUCTION: Auction notified that item {ID: %d,name: %s,finalValue: %f, lastBidder:  %d} has finished.\n",
+//                finishedAuctionItem.getId(),
+//                finishedAuctionItem.getItemName(),
+//                finishedAuctionItem.getValue(),
+//                finishedAuctionItem.getLastBidder());
+        LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Auction notified that item (ID: {0},name: {1},finalValue: {2}, lastBidder:  {3}) has finished.\n", new Object[]{
                 finishedAuctionItem.getId(),
                 finishedAuctionItem.getItemName(),
                 finishedAuctionItem.getValue(),
-                finishedAuctionItem.getLastBidder());
-        liveActionItems.remove(finishedAuctionItem.getId()); // remove from on-going auctionItems (thread-safe)
-        new FinishedAuctionItem(finishedAuctionItem, finishedItems); // add to finished and schedule expiration
+                finishedAuctionItem.getLastBidder()});
+        synchronized (liveAuctionsMapLock) {
+            liveActionItems.remove(finishedItemId); // remove from on-going auctionItems
+        }
+        new FinishedAuctionItem(finishedItemId, finishedAuctionItem, finishedItems, LOGGER); // add to finished and schedule expiration
 
-        for (long key : bidders) {
+        for (long bidderId : bidders) {
             try {
                 // notify client
-                ((IAuctionClientRemote) activeClients.get(key)).auctionItemEnd(
+                ((IAuctionClientRemote) activeClients.get(bidderId)).auctionItemEnd(
                         finishedAuctionItem.getId(),
                         finishedAuctionItem.isSold(),
                         finishedAuctionItem.getLastBidder(),
@@ -170,9 +256,10 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
                         finishedAuctionItem.getValue(),
                         finishedAuctionItem.getCreatorId()
                 );
-                System.out.format("AUCTION: Client (-- %d --) notified of finished AuctionItem '%s'.\n", key, finishedAuctionItem.getItemName());
+//                System.out.format("AUCTION: Client (-- %d --) notified of finished AuctionItem '%s'.\n", bidderId, finishedAuctionItem.getItemName());
+                LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Client (-- {0} --) notified of finished AuctionItem {1}.\n", new Object[]{bidderId, finishedAuctionItem.getItemName()});
             } catch (RemoteException e) {
-                activeClients.remove(key); // client no longer reachable.
+                activeClients.remove(bidderId); // client no longer reachable.
             } catch (NullPointerException e) {
                 // client unregistered -> do nothing
             }
@@ -189,33 +276,80 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
         return this.name;
     }
 
+    public long getServerId(String token) throws AuctionException {
+        if (token.equals("SERVER_ID_TOKEN")) {
+            return SERVER_ID;
+        }
+        throw new AuctionException("Incorrect token!\n");
+    }
+
+//    public Map<Long, IAuctionItem> getLiveActionItemsMap(long requesterId) throws AuctionException {
+//        if (requesterId == SERVER_ID)
+//            return liveActionItems;
+//        throw new AuctionException("You are not allowed to access this method!\n");
+//    }
+
+    @Override
+    public long getTesterId(String token) throws RemoteException, AuctionException {
+        if (token.equals("TESTER_STRING_TOKEN"))
+            return TESTER_ID;
+        throw new AuctionException("Token incorrect!\n");
+    }
+
+    public List<Object[]> getLiveActionItemsForStorage(long requesterId) throws AuctionException {
+        if (requesterId == SERVER_ID) {
+            List<Object[]> result = new ArrayList<>();
+            synchronized (liveAuctionsMapLock) {
+                for (Long itemId : liveActionItems.keySet()) {
+                    IAuctionItem item = liveActionItems.get(itemId);
+                    long timeLeft = item.getEndDate().getTime() - (new Date()).getTime();
+                    Object[] properties = new Object[]{
+                            item.getId(),
+                            item.getCreatorId(),
+                            item.getItemName(),
+                            item.getLastBidder(),
+                            item.getStartValue(),
+                            item.getValue(),
+                            timeLeft
+                    };
+                    result.add(properties);
+                }
+            }
+            return result;
+        }
+        throw new AuctionException("You have no access to this method.\n");
+    }
+
     /**
      * A wrapper for finished Auction Items so that they unregister themselves after a specific amount of time
      */
     private static class FinishedAuctionItem {
         private long auctionItemId;
         private Map<Long, IAuctionItem> finishedItems;
-        private Timer timer;
+        private Logger LOGGER;
 
-        public FinishedAuctionItem(IAuctionItem item, Map<Long, IAuctionItem> finishedItems) {
-            System.out.format("AUCTION: Finished item {%d,%s} set up to expire in %d seconds.\n", item.getId(), item.getItemName(), AUCTION_ITEM_EXPIRE_TIME_MILISEC / 1000);
-
+        public FinishedAuctionItem(long finishedItemId, IAuctionItem item, Map<Long, IAuctionItem> finishedItems, Logger LOGGER) {
+//            System.out.format("AUCTION: Finished item {%d,%s} set up to expire in %d seconds.\n", item.getId(), item.getItemName(), AUCTION_ITEM_EXPIRE_TIME_MILISEC / 1000);
             this.finishedItems = finishedItems;
-            this.auctionItemId = item.getId();
+            this.auctionItemId = finishedItemId;
+            this.LOGGER = LOGGER;
 
-            finishedItems.put(auctionItemId, item);
-            timer = new Timer(true);
+            finishedItems.put(this.auctionItemId, item);
+            Timer timer = new Timer(true);
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     removeFromReady();
                 }
             }, AUCTION_ITEM_EXPIRE_TIME_MILISEC);
+
+            this.LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: Finished item ({0},{1}) set up to expire in {2} seconds.\n", new Object[]{item.getId(), item.getItemName(), AUCTION_ITEM_EXPIRE_TIME_MILISEC / 1000});
         }
 
         private void removeFromReady() {
-            finishedItems.remove(auctionItemId); // remove from ConcurrentHashMap is safe in multi-threaded apps
-            System.out.println("AUCTION: AuctionItem (" + auctionItemId + ") expired and can not be reclaimed anymore.");
+            finishedItems.remove(this.auctionItemId); // remove from ConcurrentHashMap is safe in multi-threaded apps
+//            System.out.println("AUCTION: AuctionItem (" + this.auctionItemId + ") expired and can not be reclaimed anymore.");
+            LOGGER.log(DEFAULT_LOG_LEVEL, "AUCTION: AuctionItem (" + this.auctionItemId + ") expired and can not be reclaimed anymore.");
         }
     }
 }

@@ -6,10 +6,10 @@ import java.util.*;
  */
 public class AuctionItem implements IAuctionItem {
     // static consts
-    private static final DateFormat formatter = Utils.formatter;
     private static final int ITEM_NAME_MIN_LENGTH = 3;
     private static final long ITEM_MIN_ALIVE_TIME_SEC = 10;
     private static final double ITEM_MIN_START_VALUE = 10;
+    private final static int AUCTION_TOKEN = 1000;
 
     // properties
     private long id;
@@ -19,7 +19,7 @@ public class AuctionItem implements IAuctionItem {
     private double startValue;
     private double value;
     private Date endDate;
-    private List<Long> bidders;
+    private Set<Long> bidders;
 
     // connections
     private AuctionItem auctionItem;
@@ -30,14 +30,27 @@ public class AuctionItem implements IAuctionItem {
     private boolean isAlive;
     private long timeAlive;
 
+    /**
+     * Constructor to be used by the client to create AuctionItems
+     *
+     * @param id
+     * @param creatorId
+     * @param auction
+     * @param itemName
+     * @param startValue
+     * @param endDate
+     * @throws AuctionItemNegativeStartValueException
+     * @throws AuctionItemInvalidEndDateException
+     * @throws AuctionItemInvalidItemNameException
+     */
     public AuctionItem(long id, long creatorId, Auction auction, String itemName, double startValue, Date endDate) throws AuctionItemNegativeStartValueException, AuctionItemInvalidEndDateException, AuctionItemInvalidItemNameException {
 
         // Error checking
         Date now = new Date();
         long aliveTime = endDate.getTime() - now.getTime();
         if (endDate.before(now) || aliveTime < ITEM_NAME_MIN_LENGTH) {
-            String m = String.format("Invalid endDate ( %s )! The endDate must be at least %dsec after the current time - %s.\n", formatter.format(endDate), ITEM_MIN_ALIVE_TIME_SEC, formatter.format(now));
-            throw new AuctionItemInvalidEndDateException(m, endDate, formatter);
+            String m = String.format("Invalid endDate ( %s )! The endDate must be at least %dsec after the current time - %s.\n", Utils.formatter.format(endDate), ITEM_MIN_ALIVE_TIME_SEC, Utils.formatter.format(now));
+            throw new AuctionItemInvalidEndDateException(m, endDate, Utils.formatter);
         }
         if (startValue <= ITEM_MIN_START_VALUE) {
             System.out.println("AUCTION_ITEM: startValue(" + startValue + ") < ITEM_MIN_START_VALUE (10)");
@@ -60,18 +73,72 @@ public class AuctionItem implements IAuctionItem {
         this.endDate = endDate;
         this.auction = auction;
         this.isAlive = true;
-        this.bidders = new ArrayList<Long>();
+        this.bidders = new HashSet<>();
 
         // set up the Alive Timer
+        setUpTheAliveTimer(auction);
+    }
+
+    private void setUpTheAliveTimer(final Auction auction) {
         this.aliveTimer = new Timer(true);
         this.auctionItem = this;
         aliveTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 stopBids();
-                auction.itemCompleteCallback(auctionItem, bidders);
+                auction.itemCompleteCallback(auctionItem.id, auctionItem, bidders);
             }
         }, this.timeAlive);
+    }
+
+    /**
+     * Method to be used by the Auction to create AuctionItems
+     *
+     * @param token
+     * @param auction
+     * @param itemId
+     * @param creatorId
+     * @param itemName
+     * @param lastBidder
+     * @param startValue
+     * @param value
+     * @param timeLeft
+     * @return
+     */
+    public static AuctionItem createAuctionItem(int token, Auction auction, long itemId, long creatorId, String itemName, long lastBidder, double startValue, double value, long timeLeft) {
+        if (token == AUCTION_TOKEN) {
+            return new AuctionItem(auction, itemId, creatorId, itemName, lastBidder, startValue, value, timeLeft);
+        }
+        return null;
+    }
+
+    /**
+     * Constructor to use from createAuctionItem method
+     *
+     * @param auction The Auction
+     * @param itemId The ItemId
+     * @param creatorId The createrID
+     * @param itemName The Name
+     * @param lastBidder The lastBidderID
+     * @param startValue The startValue
+     * @param value The currentValue
+     * @param timeLeft The timeAlive
+     */
+    private AuctionItem(Auction auction, long itemId, long creatorId, String itemName, long lastBidder, double startValue, double value, long timeLeft) {
+        Date endDate = new Date((new Date()).getTime() + timeLeft);
+        this.timeAlive = timeLeft;
+        this.creatorId = creatorId;
+        this.id = itemId;
+        this.itemName = itemName;
+        this.lastBidder = lastBidder;
+        this.startValue = startValue;
+        this.value = value;
+        this.endDate = endDate;
+        this.auction = auction;
+        this.isAlive = true;
+        this.bidders = new HashSet<>();
+
+        setUpTheAliveTimer(auction);
     }
 
     /**
@@ -84,7 +151,7 @@ public class AuctionItem implements IAuctionItem {
     }
 
     /**
-     * A mmethod to bid for this value
+     * A method to bid for this value.
      *
      * @param bidderId the bidder Id
      * @param bidValue the bid value
