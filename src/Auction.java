@@ -31,7 +31,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     }
 
     /**
-     * Can be used to see all active items in the version1.Auction
+     * Can be used to see all active items in the Auction
      * @param clientId The id of the client that requested to see active AuctionItems
      * @return String representation of all currently active AuctionItems
      * @throws RemoteException
@@ -48,13 +48,13 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     }
 
     /**
-     * Creates and Registers an version1.Auction Item to this version1.Auction
+     * Creates and Registers an AuctionItem to this .Auction
      *
      * @param creatorId   the creator id (must be registered)
      * @param itemName    the item name
      * @param value       the item initial value
      * @param closingDate the item end time
-     * @return the ID of the new version1.AuctionItem
+     * @return the ID of the new AuctionItem
      * @throws RemoteException
      */
     @Override
@@ -64,22 +64,22 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
             AuctionItem i = new AuctionItem(newAuctionItemId, creatorId, this, itemName, value, closingDate);
             registerAuctionItem(newAuctionItemId, i);
 
-            System.out.format("AUCTION: Client (-- %d --) created and registered a new version1.AuctionItem {%d,%s,%f,%s}.\n", creatorId, newAuctionItemId, itemName, value, formatter.format(closingDate));
+            System.out.format("AUCTION: Client (-- %d --) created and registered a new AuctionItem {%d,%s,%f,%s}.\n", creatorId, newAuctionItemId, itemName, value, formatter.format(closingDate));
             return newAuctionItemId;
         } catch (AuctionItem.AuctionItemNegativeStartValueException e) {
-            System.out.format("AUCTION: Client (%d) wanted to create invalid version1.AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+            System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
             throw new AuctionException(e.getMessage());
         } catch (AuctionItem.AuctionItemInvalidEndDateException e) {
-            System.out.format("AUCTION: Client (%d) wanted to create invalid version1.AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+            System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
             throw new AuctionException(e.getMessage());
         } catch (AuctionItem.AuctionItemInvalidItemNameException e) {
-            System.out.format("AUCTION: Client (%d) wanted to create invalid version1.AuctionItem. Error:%s.\n", creatorId, e.getShortName());
+            System.out.format("AUCTION: Client (%d) wanted to create invalid AuctionItem. Error:%s.\n", creatorId, e.getShortName());
             throw new AuctionException(e.getMessage());
         }
     }
 
     /**
-     * Registers an version1.Auction Item to this version1.Auction
+     * Registers an AuctionItem to this Auction
      *
      * @param item The item that you want to register
      */
@@ -113,12 +113,12 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
         } else {
             // if item DOES NOT exist
             System.out.format("AUCTION: Client(%d) is bidding '%f' for item(%d) that is not for sale.\n", bidderId, bidValue, itemId);
-            throw new AuctionException(String.format("This item is no longer available for bidding or there is no version1.Auction Item with id '%d'.", itemId));
+            throw new AuctionException(String.format("This item is no longer available for bidding or there is no Auction Item with id '%d'.", itemId));
         }
     }
 
     /**
-     * Register as a participant in this version1.Auction
+     * Register as a participant in this Auction
      *
      * @param client The client that wants to get registered
      * @throws RemoteException
@@ -133,7 +133,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     }
 
     /**
-     * Clients can use this method to unregister from this version1.Auction. This way they will not receive notifications.
+     * Clients can use this method to unregister from this Auction. This way they will not receive notifications.
      *
      * @param clientId the client ID
      * @throws RemoteException
@@ -145,13 +145,13 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     }
 
     /**
-     * Method to call when a version1.AuctionItem is complete. It logs the data, removes the item from the list with live
-     * version1.Auction Items and notifies all clients with the result.
+     * Method to call when a AuctionItem is complete. It logs the data, removes the item from the list with live
+     * Auction Items and notifies all clients with the result.
      *
      * @param finishedAuctionItem
      */
     public void itemCompleteCallback(IAuctionItem finishedAuctionItem, List<Long> bidders) {
-        System.out.format("AUCTION: version1.Auction notified that item {ID: %d,name: %s,finalValue: %f, lastBidder:  %d} has finished.\n",
+        System.out.format("AUCTION: Auction notified that item {ID: %d,name: %s,finalValue: %f, lastBidder:  %d} has finished.\n",
                 finishedAuctionItem.getId(),
                 finishedAuctionItem.getItemName(),
                 finishedAuctionItem.getValue(),
@@ -170,7 +170,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
                         finishedAuctionItem.getValue(),
                         finishedAuctionItem.getCreatorId()
                 );
-                System.out.format("AUCTION: Client (-- %d --) notified of finished version1.AuctionItem '%s'.\n", key, finishedAuctionItem.getItemName());
+                System.out.format("AUCTION: Client (-- %d --) notified of finished AuctionItem '%s'.\n", key, finishedAuctionItem.getItemName());
             } catch (RemoteException e) {
                 activeClients.remove(key); // client no longer reachable.
             } catch (NullPointerException e) {
@@ -190,7 +190,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
     }
 
     /**
-     * A wrapper for finished version1.Auction Items so that they unregister themselves after a specific amount of time
+     * A wrapper for finished Auction Items so that they unregister themselves after a specific amount of time
      */
     private static class FinishedAuctionItem {
         private long auctionItemId;
@@ -215,7 +215,7 @@ public class Auction extends UnicastRemoteObject implements IAuctionRemote {
 
         private void removeFromReady() {
             finishedItems.remove(auctionItemId); // remove from ConcurrentHashMap is safe in multi-threaded apps
-            System.out.println("AUCTION: version1.AuctionItem (" + auctionItemId + ") expired and can not be reclaimed anymore.");
+            System.out.println("AUCTION: AuctionItem (" + auctionItemId + ") expired and can not be reclaimed anymore.");
         }
     }
 }

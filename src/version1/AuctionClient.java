@@ -112,7 +112,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                                 boolean result = auctionHouseRemote.bidForItem(this.id, auctionId, itemId, bidValue);
                                                 System.out.println(result ? "You are the highest bidder!":"Your bid was less than the current value of the item!");
                                             } catch (NumberFormatException e) {
-                                                System.out.printf("The bidValue must be of type Double (E.x: 10.25, 25).");
+                                                System.out.printf("The bidValue must be of type Double (E.x: 10.25, 25).\n");
                                             } catch (AuctionHouseException e){
                                                 System.out.println(e.getMessage());
                                             }
@@ -150,7 +150,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                                                 System.out.println(e.getMessage());
                                             }
                                         } catch (NumberFormatException e) {
-                                            System.out.printf("The bidValue must be of type Double (E.x: 10.25).");
+                                            System.out.printf("The bidValue must be of type Double (E.x: 10.25).\n");
                                         }
                                     } catch (NumberFormatException e) {
                                         System.out.printf("The autionID must consist of only NUMBERS.");

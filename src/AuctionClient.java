@@ -66,29 +66,24 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                             ;
                         case "--bid":
                             switch (input.length) {
-                                case 4:
+                                case 3:
                                     try {
-                                        long auctionId = Long.valueOf(input[1]);
+                                        long itemId = Long.valueOf(input[1]);
                                         try {
-                                            long itemId = Long.valueOf(input[2]);
-                                            try {
-                                                double bidValue = Double.parseDouble(input[3]);
-                                                boolean result = auction.bidForItem(this.id, itemId, bidValue);
-                                                System.out.println(result ? "You are the highest bidder!":"Your bid was less than the current value of the item!");
-                                            } catch (NumberFormatException e) {
-                                                System.out.printf("The bidValue must be of type Double (E.x: 10.25, 25).");
-                                            } catch (AuctionException e){
-                                                System.out.println(e.getMessage());
-                                            }
+                                            double bidValue = Double.parseDouble(input[2]);
+                                            boolean result = auction.bidForItem(this.id, itemId, bidValue);
+                                            System.out.println(result ? "You are the highest bidder!" : "Your bid was less than the current value of the item!");
                                         } catch (NumberFormatException e) {
-                                            System.out.printf("The itemID must consist of only NUMBERS.");
+                                            System.out.printf("The bidValue must be of type Double (E.x: 10.25, 25).\n");
+                                        } catch (AuctionException e) {
+                                            System.out.println(e.getMessage());
                                         }
                                     } catch (NumberFormatException e) {
-                                        System.out.printf("The autionID must consist of only NUMBERS.");
+                                        System.out.printf("The itemID must consist of only NUMBERS.");
                                     }
                                     break;
                                 default:
-                                    System.out.printf("Too many or too few arguments. Must be exactly 3 arguments\n");
+                                    System.out.printf("Too many or too few arguments. Must be exactly 2 arguments\n");
                             }
                             break;
                         case "--c":
@@ -96,28 +91,23 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
                         case "--create":
                             switch (input.length) {
                                 case 1:
-                                    System.out.println("--c <auctionId> <itemName> <startValue> <dd/MM/yyyy-hh:mm:ss endDate>");
+                                    System.out.println("--c <itemName> <startValue> <dd/MM/yyyy-hh:mm:ss endDate>");
                                     break;
-                                case 5:
+                                case 4:
                                     try {
-                                        long auctionId = Long.valueOf(input[1]);
+                                        String itemName = input[1];
+                                        double value = Double.valueOf(input[2]);
                                         try {
-                                            String itemName = input[2];
-                                            double value = Double.valueOf(input[3]);
-                                            try {
-                                                Date endDate = formatter.parse(input[4]);
-                                                long result = auction.createAndRegisterAuctionItem(this.id, itemName, value, endDate);
-                                                System.out.println("Create item with ID: " + result);
-                                            } catch (ParseException e) {
-                                                System.out.println("Date must be in the format dd/MM/yyyy-hh:mm:ss.");
-                                            } catch (AuctionException e) {
-                                                System.out.println(e.getMessage());
-                                            }
-                                        } catch (NumberFormatException e) {
-                                            System.out.printf("The bidValue must be of type Double (E.x: 10.25).");
+                                            Date endDate = formatter.parse(input[3]);
+                                            long result = auction.createAndRegisterAuctionItem(this.id, itemName, value, endDate);
+                                            System.out.println("Create item with ID: " + result);
+                                        } catch (ParseException e) {
+                                            System.out.println("Date must be in the format dd/MM/yyyy-hh:mm:ss.");
+                                        } catch (AuctionException e) {
+                                            System.out.println(e.getMessage());
                                         }
                                     } catch (NumberFormatException e) {
-                                        System.out.printf("The autionID must consist of only NUMBERS.");
+                                        System.out.printf("The bidValue must be of type Double (E.x: 10.25).\n");
                                     }
                                     break;
                                 default:
@@ -152,8 +142,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
         System.out.printf("Hello,\nAvailable commands:\n" +
                 "\t* --l: Prints all available Auctions with their name and Ids\n" +
                 "\t* --c 'itemName' 'startValue' 'endDate': Creates a new version1.Auction Item with the specified details\n" +
-                "\t* --b 'itemId' 'bidValue':  Bids for that particular version1.Auction Item in that particular version1.Auction\n" +
-                "\nRemember that you have to register (--r command) in an version1.Auction before you can do bid for Items or create new Items in this version1.Auction.\n");
+                "\t* --b 'itemId' 'bidValue':  Bids for that particular version1.Auction Item in that particular version1.Auction\n");
     }
 
     public static void main(String[] args) {

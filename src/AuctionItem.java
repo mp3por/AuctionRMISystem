@@ -146,7 +146,7 @@ public class AuctionItem implements IAuctionItem {
 
     @Override
     public String toString() {
-        return "version1.AuctionItem{" +
+        return "AuctionItem{" +
                 "id=" + id +
                 ", creatorId=" + creatorId +
                 ", lastBidder=" + lastBidder +
