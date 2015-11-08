@@ -121401,3 +121401,71 @@
 </message>
 </record>
 </log>
+<?xml version="1.0" encoding="windows-1252" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2015-11-08T20:56:10</date>
+  <millis>1447016170063</millis>
+  <sequence>1</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>&lt;init&gt;</method>
+  <thread>1</thread>
+  <message>AUCTION: created.
+</message>
+</record>
+</log>
+<?xml version="1.0" encoding="windows-1252" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2015-11-08T20:59:24</date>
+  <millis>1447016364453</millis>
+  <sequence>1</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>&lt;init&gt;</method>
+  <thread>1</thread>
+  <message>AUCTION: created.
+</message>
+</record>
+<record>
+  <date>2015-11-08T20:59:24</date>
+  <millis>1447016364521</millis>
+  <sequence>4</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>createAndRegisterAuctionItem</method>
+  <thread>1</thread>
+  <message>AUCTION: Client (-- -1 --) created and registered a new AuctionItem (0,Guitar,100,08/11/15-21:09:24).
+</message>
+</record>
+<record>
+  <date>2015-11-08T20:59:24</date>
+  <millis>1447016364523</millis>
+  <sequence>5</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>createAndRegisterAuctionItem</method>
+  <thread>1</thread>
+  <message>AUCTION: Client (-- -1 --) created and registered a new AuctionItem (1,Piano,100,08/11/15-21:09:24).
+</message>
+</record>
+<record>
+  <date>2015-11-08T20:59:24</date>
+  <millis>1447016364524</millis>
+  <sequence>6</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>createAndRegisterAuctionItem</method>
+  <thread>1</thread>
+  <message>AUCTION: Client (-- -1 --) created and registered a new AuctionItem (2,Bottle,100,08/11/15-21:09:24).
+</message>
+</record>
+</log>
