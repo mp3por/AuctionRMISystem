@@ -121469,3 +121469,107 @@
 </message>
 </record>
 </log>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2015-11-10T11:04:14</date>
+  <millis>1447153454315</millis>
+  <sequence>1</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>&lt;init&gt;</method>
+  <thread>1</thread>
+  <message>AUCTION: created.
+</message>
+</record>
+</log>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2015-11-10T11:06:11</date>
+  <millis>1447153571372</millis>
+  <sequence>1</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>&lt;init&gt;</method>
+  <thread>1</thread>
+  <message>AUCTION: created.
+</message>
+</record>
+<record>
+  <date>2015-11-10T11:06:16</date>
+  <millis>1447153576929</millis>
+  <sequence>6</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>registerClient</method>
+  <thread>20</thread>
+  <message>AUCTION: Registering client:0.
+</message>
+</record>
+<record>
+  <date>2015-11-10T11:06:18</date>
+  <millis>1447153578603</millis>
+  <sequence>7</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>getAuctionLiveItems</method>
+  <thread>20</thread>
+  <message>AUCTION: Client 0 requested auctionItems.
+</message>
+</record>
+<record>
+  <date>2015-11-10T11:07:03</date>
+  <millis>1447153623093</millis>
+  <sequence>8</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>createAndRegisterAuctionItem</method>
+  <thread>20</thread>
+  <message>AUCTION: Client (-- 0 --) created and registered a new AuctionItem (0,NASKO,100,10/11/15-11:07:11).
+</message>
+</record>
+<record>
+  <date>2015-11-10T11:07:05</date>
+  <millis>1447153625756</millis>
+  <sequence>9</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>getAuctionLiveItems</method>
+  <thread>20</thread>
+  <message>AUCTION: Client 0 requested auctionItems.
+</message>
+</record>
+<record>
+  <date>2015-11-10T11:07:11</date>
+  <millis>1447153631003</millis>
+  <sequence>10</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>itemCompleteCallback</method>
+  <thread>22</thread>
+  <message>AUCTION: Auction notified that item (ID: 0,name: NASKO,finalValue: 100, lastBidder:  -1) has finished.
+</message>
+</record>
+<record>
+  <date>2015-11-10T11:07:11</date>
+  <millis>1447153631006</millis>
+  <sequence>11</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction$FinishedAuctionItem</class>
+  <method>&lt;init&gt;</method>
+  <thread>22</thread>
+  <message>AUCTION: Finished item (0,NASKO) set up to expire in 120 seconds.
+</message>
+</record>
+</log>

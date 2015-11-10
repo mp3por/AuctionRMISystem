@@ -1,3 +1,4 @@
+import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -20,8 +21,8 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
     public AuctionClient() throws RemoteException {
         try {
             System.out.format("Client starting.\n");
-            Registry reg = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT);
-            Object o = reg.lookup(Utils.AUCTION_REGISTRY_NAME);
+//            Registry reg = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT);
+            Object o = Naming.lookup(Utils.AUCTION_REGISTRY_NAME);
             auction = (IAuctionRemote) o;
 
             itemsBid = new HashMap<Long, List<Long>>();

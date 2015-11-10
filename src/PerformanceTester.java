@@ -18,7 +18,7 @@ public class PerformanceTester {
         auction = (IAuctionRemote) o;
 
         this.id = auction.getTesterId("TESTER_STRING_TOKEN"); // one call to prime system.
-        auction.setCommandLineLoggingLevel(this.id, Level.WARNING); // to disable all logs
+//        auction.setCommandLineLoggingLevel(this.id, Level.WARNING); // to disable all logs
 
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 10000; i++)
@@ -28,7 +28,7 @@ public class PerformanceTester {
         System.out.format("10000 calls in %d ms - %d.%03d ms/call\n",
                 elapsedTime, elapsedTime / 10000, (elapsedTime % 10000) / 10);
 
-        auction.setCommandLineLoggingLevel(this.id, Level.INFO); // to reanable all logs
+//        auction.setCommandLineLoggingLevel(this.id, Level.INFO); // to reanable all logs
 
     }
 

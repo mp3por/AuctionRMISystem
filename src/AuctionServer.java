@@ -1,4 +1,5 @@
 import java.io.*;
+import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
@@ -20,14 +21,17 @@ public class AuctionServer {
         String auctionName = args[0];
         try {
             logger.log(DEFAULT_LOG_LEVEL, "Creating Auction (-- {0} --)", auctionName);
+            LocateRegistry.createRegistry(Utils.AUCTION_SERVER_RMI_PORT);
+
             auction = new Auction(auctionName);
             this.id = auction.getServerId("SERVER_ID_TOKEN");
 
             IAuctionRemote auctionRemote = auction; // for Remote Registering
             logger.log(DEFAULT_LOG_LEVEL, "Auction created \n. Now lets register it.\n");
 
-            Registry auctionServerRegistry = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT);
-            auctionServerRegistry.rebind(Utils.AUCTION_REGISTRY_NAME, auctionRemote);
+//            Registry auctionServerRegistry = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT)
+//            auctionServerRegistry.rebind(Utils.AUCTION_REGISTRY_NAME, auctionRemote);
+            Naming.rebind(Utils.AUCTION_REGISTRY_NAME, auctionRemote);
             logger.log(DEFAULT_LOG_LEVEL, "Auction registered to the global AUCTION_SERVER RMI registry.\n");
 
             try {

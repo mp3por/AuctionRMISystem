@@ -8,7 +8,7 @@ public class Utils {
 
     public static final int AUCTION_SERVER_RMI_PORT = 1099;
 
-    public static final String AUCTION_REGISTRY_NAME = "//localhost/AuctionServer/";
+    public static final String AUCTION_REGISTRY_NAME = "rmi://localhost/AuctionServer/";
     public static final String AUCTION_HOUSE_REGISTRY_NAME = "//localhost/AuctionHouseServer";
 
     public static final long DEFAULT_BIDDER_ID = 0;
