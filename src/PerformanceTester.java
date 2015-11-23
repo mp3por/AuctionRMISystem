@@ -23,7 +23,7 @@ public class PerformanceTester {
 //        Registry auctionServerRegistry = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT);
 //        Object o = auctionServerRegistry.lookup("rmi://" + Utils.AUCTION_SERVER_HOST + "/" + Utils.AUCTION_SERVER_NAME);
 
-        Object o = Naming.lookup("rmi://" + Utils.AUCTION_SERVER_HOST + "/" + Utils.AUCTION_SERVER_NAME);
+        Object o = Naming.lookup("rmi://" + host + "/" + Utils.AUCTION_SERVER_NAME);
         auction = (IAuctionRemote) o;
 
         this.id = auction.getTesterId("TESTER_STRING_TOKEN"); // one call to prime system and get the TESTER_ID
