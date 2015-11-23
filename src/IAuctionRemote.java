@@ -1,7 +1,6 @@
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Date;
-import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -20,7 +19,7 @@ public interface IAuctionRemote extends Remote {
 
     String getName() throws RemoteException;
 
-    String print() throws RemoteException;
+    void setCommandLineLoggingLevel(long requesterId, Level warning) throws RemoteException;
 
     long getTesterId(String token) throws RemoteException, AuctionException;;
 }

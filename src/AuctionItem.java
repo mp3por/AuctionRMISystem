@@ -45,8 +45,6 @@ public class AuctionItem implements IAuctionItem {
      * @throws AuctionItemInvalidItemNameException
      */
     public AuctionItem(long id, long creatorId, Auction auction, String itemName, double startValue, Date endDate) throws AuctionItemNegativeStartValueException, AuctionItemInvalidEndDateException, AuctionItemInvalidItemNameException {
-        this(auction,id,creatorId,itemName, Utils.DEFAULT_LAST_BIDDER_ID,startValue,startValue,endDate.getTime()-(new Date()).getTime());
-
 
         // Error checking
         Date now = new Date();
@@ -81,10 +79,13 @@ public class AuctionItem implements IAuctionItem {
 
 
         // set up the Alive Timer
-        setUpTheAliveTimer(auction);
+        setUpTheAliveTimer();
     }
 
-    private void setUpTheAliveTimer(final Auction auction) {
+    /**
+     * Sets up the timer to notify after a certain time.
+     */
+    private synchronized void setUpTheAliveTimer() {
         this.aliveTimer = new Timer(true);
         this.auctionItem = this;
         aliveTimer.schedule(new TimerTask() {
@@ -110,7 +111,7 @@ public class AuctionItem implements IAuctionItem {
      * @param timeLeft
      * @return
      */
-    public static AuctionItem createAuctionItem(int token, Auction auction, long itemId, long creatorId, String itemName, long lastBidder, double startValue, double value, long timeLeft) {
+    public synchronized static AuctionItem createAuctionItem(int token, Auction auction, long itemId, long creatorId, String itemName, long lastBidder, double startValue, double value, long timeLeft) {
         if (token == AUCTION_TOKEN) {
             return new AuctionItem(auction, itemId, creatorId, itemName, lastBidder, startValue, value, timeLeft);
         }
@@ -144,7 +145,7 @@ public class AuctionItem implements IAuctionItem {
         this.bidders = new HashSet<>();
         bidders.add(creatorId);
 
-        setUpTheAliveTimer(auction);
+        setUpTheAliveTimer();
     }
 
     /**
@@ -159,7 +160,7 @@ public class AuctionItem implements IAuctionItem {
      * A method to bid for this value.
      *
      * @param bidderId the bidder Id
-     * @param bidValue the bid value
+     * @param   the bid value
      * @return boolean if the bid was successfull.
      */
     @Override
@@ -196,7 +197,7 @@ public class AuctionItem implements IAuctionItem {
     }
 
     @Override
-    public long getLastBidder() {
+    public synchronized long getLastBidder() {
         return lastBidder;
     }
 

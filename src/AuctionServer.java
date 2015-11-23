@@ -16,6 +16,15 @@ public class AuctionServer {
     private Logger logger;
     private static final Level DEFAULT_LOG_LEVEL = Level.INFO;
 
+    private void printHelp() {
+        System.out.printf("Hello,\nAvailable commands:\n" +
+                "\t* --slaf 'fileName': Saves all active AuctionItems to that file\n" +
+                "\t* --llaf 'fileName': Loads AuctionItems from that file\n" +
+                "\n\nNote: file loading format:\n" +
+                "\t1. One item per line\n" +
+                "\t2. format: 'itemId' '-1' 'itemName' '-1' 'startPrice' 'currentPrice' 'timeLeft'\n");
+    }
+
     public AuctionServer(String[] args) {
         logger = Logger.getLogger(this.getClass().getName());
         String auctionName = args[0];
@@ -24,6 +33,8 @@ public class AuctionServer {
             LocateRegistry.createRegistry(Utils.AUCTION_SERVER_RMI_PORT);
 
             auction = new Auction(auctionName);
+
+            // needed for extracting/loading files with AuctionItems
             this.id = auction.getServerId("SERVER_ID_TOKEN");
 
             IAuctionRemote auctionRemote = auction; // for Remote Registering
@@ -31,7 +42,7 @@ public class AuctionServer {
 
 //            Registry auctionServerRegistry = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT)
 //            auctionServerRegistry.rebind(Utils.AUCTION_REGISTRY_NAME, auctionRemote);
-            Naming.rebind(Utils.AUCTION_REGISTRY_NAME, auctionRemote);
+            Naming.rebind("rmi://" + Utils.AUCTION_SERVER_HOST + "/" + Utils.AUCTION_SERVER_NAME, auctionRemote);
             logger.log(DEFAULT_LOG_LEVEL, "Auction registered to the global AUCTION_SERVER RMI registry.\n");
 
             try {
@@ -46,6 +57,8 @@ public class AuctionServer {
             e.printStackTrace();
             System.exit(1);
         }
+
+        printHelp();
 
         Scanner stdin = new Scanner(System.in);
         String buf = null;
@@ -119,7 +132,7 @@ public class AuctionServer {
                 String[] inputs = line.split(" ");
                 result.add(inputs);
             }
-            auction.bulkCreateAndRegisterAuctionItems(-1111, result);
+            auction.bulkCreateAndRegisterAuctionItems(this.id, result);
         } catch (NumberFormatException e) {
             e.printStackTrace();
             auction.rollBackLastBulkAdd(this.id);
@@ -134,6 +147,5 @@ public class AuctionServer {
 
     public static void main(String[] args) {
         new AuctionServer(args);
-
     }
 }

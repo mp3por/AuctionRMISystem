@@ -22,11 +22,13 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
         try {
             System.out.format("Client starting.\n");
 //            Registry reg = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT);
-            Object o = Naming.lookup(Utils.AUCTION_REGISTRY_NAME);
+            Object o = Naming.lookup("rmi://" + Utils.AUCTION_SERVER_HOST + "/" + Utils.AUCTION_SERVER_NAME);
             auction = (IAuctionRemote) o;
 
             itemsBid = new HashMap<Long, List<Long>>();
+
             this.id = auction.registerClient(this);
+
 
             System.out.format("Client with ID (-- %d --) registered.\n", this.id);
         } catch (Exception e) {
