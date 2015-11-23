@@ -17,7 +17,7 @@ public class PerformanceTester {
     private int N = 1000;
     private long id, startTime, elapsedTime;
 
-    public PerformanceTester(String host) throws Exception {
+    public PerformanceTester(String host, int test) throws Exception {
 
         // connect to an auction to test
 //        Registry auctionServerRegistry = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT);
@@ -30,10 +30,20 @@ public class PerformanceTester {
         auction.setCommandLineLoggingLevel(this.id, Level.WARNING); // to disable all logs
         System.out.println("Testing Auction: " + auction.getName());
 
-//        getStatsGetAuctionLiveItems();
-//        getStatBidItem();
-//        getStatCreateAuctionItem();
-        getStataConcurrrentCreateAndBid();
+        switch (test) {
+            case 1:
+                getStatsGetAuctionLiveItems();
+                break;
+            case 2:
+                getStatBidItem();
+                break;
+            case 3:
+                getStatCreateAuctionItem();
+                break;
+            case 4:
+                getStataConcurrrentCreateAndBid();
+                break;
+        }
 
         auction.setCommandLineLoggingLevel(this.id, Level.INFO); // to reanable all logs
 
@@ -140,6 +150,6 @@ public class PerformanceTester {
 
 
     public static void main(String[] args) throws Exception {
-        new PerformanceTester(args[0]);
+        new PerformanceTester(args[0], Integer.valueOf(args[1]));
     }
 }
