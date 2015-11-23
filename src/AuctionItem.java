@@ -1,3 +1,4 @@
+import javax.rmi.CORBA.Util;
 import java.text.DateFormat;
 import java.util.*;
 
@@ -44,6 +45,8 @@ public class AuctionItem implements IAuctionItem {
      * @throws AuctionItemInvalidItemNameException
      */
     public AuctionItem(long id, long creatorId, Auction auction, String itemName, double startValue, Date endDate) throws AuctionItemNegativeStartValueException, AuctionItemInvalidEndDateException, AuctionItemInvalidItemNameException {
+        this(auction,id,creatorId,itemName, Utils.DEFAULT_LAST_BIDDER_ID,startValue,startValue,endDate.getTime()-(new Date()).getTime());
+
 
         // Error checking
         Date now = new Date();
@@ -61,6 +64,7 @@ public class AuctionItem implements IAuctionItem {
             throw new AuctionItemInvalidItemNameException(m, itemName);
         }
 
+
         // Fields assignment
         this.timeAlive = aliveTime;
         this.creatorId = creatorId;
@@ -73,6 +77,8 @@ public class AuctionItem implements IAuctionItem {
         this.auction = auction;
         this.isAlive = true;
         this.bidders = new HashSet<>();
+        bidders.add(creatorId);
+
 
         // set up the Alive Timer
         setUpTheAliveTimer(auction);
@@ -136,6 +142,7 @@ public class AuctionItem implements IAuctionItem {
         this.auction = auction;
         this.isAlive = true;
         this.bidders = new HashSet<>();
+        bidders.add(creatorId);
 
         setUpTheAliveTimer(auction);
     }

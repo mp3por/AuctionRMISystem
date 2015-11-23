@@ -121573,3 +121573,103 @@
 </message>
 </record>
 </log>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2015-11-15T20:54:36</date>
+  <millis>1447620876559</millis>
+  <sequence>1</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>&lt;init&gt;</method>
+  <thread>1</thread>
+  <message>AUCTION: created.
+</message>
+</record>
+<record>
+  <date>2015-11-15T20:55:35</date>
+  <millis>1447620935131</millis>
+  <sequence>7</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>registerClient</method>
+  <thread>18</thread>
+  <message>AUCTION: Registering client:0.
+</message>
+</record>
+<record>
+  <date>2015-11-15T20:55:43</date>
+  <millis>1447620943440</millis>
+  <sequence>8</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>getAuctionLiveItems</method>
+  <thread>18</thread>
+  <message>AUCTION: Client 0 requested auctionItems.
+</message>
+</record>
+<record>
+  <date>2015-11-15T20:56:10</date>
+  <millis>1447620970552</millis>
+  <sequence>9</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>createAndRegisterAuctionItem</method>
+  <thread>18</thread>
+  <message>AUCTION: Client (-- 0 --) created and registered a new AuctionItem (0,Nasko,100,15/11/15-21:00:00).
+</message>
+</record>
+<record>
+  <date>2015-11-15T20:56:15</date>
+  <millis>1447620975263</millis>
+  <sequence>10</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>getAuctionLiveItems</method>
+  <thread>18</thread>
+  <message>AUCTION: Client 0 requested auctionItems.
+</message>
+</record>
+<record>
+  <date>2015-11-15T20:56:36</date>
+  <millis>1447620996366</millis>
+  <sequence>11</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>registerClient</method>
+  <thread>22</thread>
+  <message>AUCTION: Registering client:1.
+</message>
+</record>
+<record>
+  <date>2015-11-15T20:56:38</date>
+  <millis>1447620998095</millis>
+  <sequence>12</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>getAuctionLiveItems</method>
+  <thread>22</thread>
+  <message>AUCTION: Client 1 requested auctionItems.
+</message>
+</record>
+<record>
+  <date>2015-11-15T20:56:44</date>
+  <millis>1447621004879</millis>
+  <sequence>13</sequence>
+  <logger>Auction</logger>
+  <level>INFO</level>
+  <class>Auction</class>
+  <method>bidForItem</method>
+  <thread>22</thread>
+  <message>AUCTION: Client (-- 1 --) is bidding {1} for item(0,Nasko) with current bid value:100.
+</message>
+</record>
+</log>
