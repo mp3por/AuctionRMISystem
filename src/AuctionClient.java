@@ -18,11 +18,11 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
     DateFormat formatter = new SimpleDateFormat("dd/MM/yy-HH:mm:ss");
     Map<Long, List<Long>> itemsBid;
 
-    public AuctionClient() throws RemoteException {
+    public AuctionClient(String host) throws RemoteException {
         try {
             System.out.format("Client starting.\n");
 //            Registry reg = LocateRegistry.getRegistry("localhost", Utils.AUCTION_SERVER_RMI_PORT);
-            Object o = Naming.lookup("rmi://" + Utils.AUCTION_SERVER_HOST + "/" + Utils.AUCTION_SERVER_NAME);
+            Object o = Naming.lookup("rmi://" + host + "/" + Utils.AUCTION_SERVER_NAME);
             auction = (IAuctionRemote) o;
 
             itemsBid = new HashMap<Long, List<Long>>();
@@ -150,7 +150,7 @@ public class AuctionClient extends UnicastRemoteObject implements IAuctionClient
 
     public static void main(String[] args) {
         try {
-            new AuctionClient();
+            new AuctionClient(args[0]);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
