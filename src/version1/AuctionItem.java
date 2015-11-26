@@ -148,7 +148,7 @@ public class AuctionItem implements IAuctionItem {
 
     @Override
     public String toString() {
-        return "version1.AuctionItem{" +
+        return "version1.velin.server.AuctionItem{" +
                 "id=" + id +
                 ", creatorId=" + creatorId +
                 ", lastBidder=" + lastBidder +

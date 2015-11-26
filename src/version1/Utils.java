@@ -11,7 +11,7 @@ public class Utils {
     public static final int AUCTION_SERVER_RMI_PORT = 2001;
     public static final int AUCTION_HOUSE_SERVER_RMI_PORT = 1099;
 
-    public static final String AUCTION_REGISTRY_NAME = "//localhost/version1.AuctionServer/%s";
+    public static final String AUCTION_REGISTRY_NAME = "//localhost/version1.velin.server.AuctionServer/%s";
     public static final String AUCTION_HOUSE_REGISTRY_NAME = "//localhost/version1.AuctionHouseServer";
 
     public static final long DEFAULT_BIDDER_ID = 0;

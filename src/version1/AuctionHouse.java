@@ -23,8 +23,8 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
     }
 
     /**
-     * Registers an version1.Auction to this version1.AuctionHouse which starts to manage the version1.Auction
-     * @param auction The version1.Auction that is trying to get registered
+     * Registers an version1.velin.server.Auction to this version1.AuctionHouse which starts to manage the version1.velin.server.Auction
+     * @param auction The version1.velin.server.Auction that is trying to get registered
      * @return The auction ID assigned by the version1.AuctionHouse
      * @throws RemoteException
      */
@@ -38,8 +38,8 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
     }
 
     /**
-     * Unregisters the version1.Auction from the version1.AuctionHouse
-     * @param auctionId The id of the version1.Auction
+     * Unregisters the version1.velin.server.Auction from the version1.AuctionHouse
+     * @param auctionId The id of the version1.velin.server.Auction
      */
     @Override
     public void unregisterAuction(long auctionId) {
@@ -93,7 +93,7 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
             try {
                 b.append("\t* " + iAuctionRemote.print() + "\n");
             } catch (RemoteException e) {
-                // This version1.Auction is not accessible any more so lets remove it.
+                // This version1.velin.server.Auction is not accessible any more so lets remove it.
                 activeAuctions.remove(key);
             }
         }
@@ -103,9 +103,9 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
 
     /**
      * Can be used by the Client to view active AuctionItems in particular Auctions
-     * @param auctionId The particular version1.Auction ID
+     * @param auctionId The particular version1.velin.server.Auction ID
      * @param clientId The Client's ID
-     * @return String representation of all currently active AuctionItems in the specified version1.Auction
+     * @return String representation of all currently active AuctionItems in the specified version1.velin.server.Auction
      * @throws RemoteException
      * @throws AuctionHouseException
      */
@@ -114,21 +114,21 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
         IAuctionRemote auction = activeAuctions.get(auctionId);
         if (auction != null) {
             try {
-                System.out.printf("AUCTION_HOUSE: Client (%d) wanted to see live items of version1.Auction (%d).\n", clientId, auctionId);
+                System.out.printf("AUCTION_HOUSE: Client (%d) wanted to see live items of version1.velin.server.Auction (%d).\n", clientId, auctionId);
                 return auction.getAuctionLiveItems(clientId);
             } catch (RemoteException e) {
-                System.out.printf("AUCTION_HOUSE: Client (%d) wanted to see live items of UNREACHABLE version1.Auction (%d).\n", clientId, auctionId);
-                throw new AuctionHouseException(String.format("Apologies! The version1.Auction (%d) you are looking for is not longer available.\n", auctionId));
+                System.out.printf("AUCTION_HOUSE: Client (%d) wanted to see live items of UNREACHABLE version1.velin.server.Auction (%d).\n", clientId, auctionId);
+                throw new AuctionHouseException(String.format("Apologies! The version1.velin.server.Auction (%d) you are looking for is not longer available.\n", auctionId));
             }
         } else {
-            throw new AuctionHouseException(String.format("version1.Auction with id (-- %d --) does not exist.\n", auctionId));
+            throw new AuctionHouseException(String.format("version1.velin.server.Auction with id (-- %d --) does not exist.\n", auctionId));
         }
     }
 
     /**
-     * Can be used by the Client to register to an version1.Auction allowing him to bid for active AuctionItems or create new
-     * AuctionItems in the specified version1.Auction
-     * @param auctionId The ID of the version1.Auction
+     * Can be used by the Client to register to an version1.velin.server.Auction allowing him to bid for active AuctionItems or create new
+     * AuctionItems in the specified version1.velin.server.Auction
+     * @param auctionId The ID of the version1.velin.server.Auction
      * @param client The Client
      * @throws RemoteException
      * @throws AuctionHouseException
@@ -140,18 +140,18 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
             try {
                 auction.registerClient(client);
             } catch (RemoteException e) {
-                throw new AuctionHouseException(String.format("Apologies! The version1.Auction (%d) you are looking for is not longer available.\n", auctionId));
+                throw new AuctionHouseException(String.format("Apologies! The version1.velin.server.Auction (%d) you are looking for is not longer available.\n", auctionId));
             }
         } else {
-            throw new AuctionHouseException(String.format("version1.Auction with id (-- %d --) does not exist.\n", auctionId));
+            throw new AuctionHouseException(String.format("version1.velin.server.Auction with id (-- %d --) does not exist.\n", auctionId));
         }
     }
 
     /**
-     * Can be used by the Client to bid for an version1.AuctionItem in a particular version1.Auction
+     * Can be used by the Client to bid for an version1.velin.server.AuctionItem in a particular version1.velin.server.Auction
      * @param bidderId The id of the bidder
-     * @param auctionId The id of the version1.Auction where the version1.AuctionItem is
-     * @param itemId The id of an version1.AuctionItem in the specified version1.Auction
+     * @param auctionId The id of the version1.velin.server.Auction where the version1.velin.server.AuctionItem is
+     * @param itemId The id of an version1.velin.server.AuctionItem in the specified version1.velin.server.Auction
      * @param bidValue The value of the bid
      * @return
      * @throws RemoteException
@@ -164,23 +164,23 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
             try {
                 return auction.bidForItem(bidderId, itemId, bidValue);
             } catch (RemoteException e) {
-                throw new AuctionHouseException(String.format("Apologies! The version1.Auction (%d) you are looking for is not longer available.\n", auctionId));
+                throw new AuctionHouseException(String.format("Apologies! The version1.velin.server.Auction (%d) you are looking for is not longer available.\n", auctionId));
             } catch (AuctionException e) {
                 throw new AuctionHouseException(e.getMessage());
             }
         } else {
-            throw new AuctionHouseException(String.format("version1.Auction with id (-- %d --) does not exist.\n", auctionId));
+            throw new AuctionHouseException(String.format("version1.velin.server.Auction with id (-- %d --) does not exist.\n", auctionId));
         }
     }
 
     /**
-     * Can be used by the Client to create new AuctionItems in a particular version1.Auction
+     * Can be used by the Client to create new AuctionItems in a particular version1.velin.server.Auction
      * @param creatorId The creater ID
-     * @param auctionId The particular version1.Auction ID
+     * @param auctionId The particular version1.velin.server.Auction ID
      * @param itemName The name of the new Item
-     * @param value The starting value of the new version1.AuctionItem
-     * @param endDate The end of the version1.AuctionItem after which no more bids are allowed (format dd/MM/yyyy-hh:mm:ss)
-     * @return The ID of the new version1.AuctionItem
+     * @param value The starting value of the new version1.velin.server.AuctionItem
+     * @param endDate The end of the version1.velin.server.AuctionItem after which no more bids are allowed (format dd/MM/yyyy-hh:mm:ss)
+     * @return The ID of the new version1.velin.server.AuctionItem
      * @throws RemoteException
      * @throws AuctionHouseException
      */
@@ -191,12 +191,12 @@ public class AuctionHouse extends UnicastRemoteObject implements IAuctionHouseRe
             try {
                 return auction.createAndRegisterAuctionItem(creatorId, itemName, value, endDate);
             } catch (RemoteException e) {
-                throw new AuctionHouseException(String.format("Apologies! The version1.Auction (%d) you are looking for is not longer available.\n", auctionId));
+                throw new AuctionHouseException(String.format("Apologies! The version1.velin.server.Auction (%d) you are looking for is not longer available.\n", auctionId));
             } catch (AuctionException e) {
                 throw new AuctionHouseException(e.getMessage());
             }
         } else {
-            throw new AuctionHouseException(String.format("version1.Auction with id (-- %d --) does not exist.\n", auctionId));
+            throw new AuctionHouseException(String.format("version1.velin.server.Auction with id (-- %d --) does not exist.\n", auctionId));
         }
     }
 }
