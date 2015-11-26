@@ -4,10 +4,12 @@ SERVER=velin/server
 CLIENT=velin/client
 TEST=velin/test
 COMMON=velin/common
+OUT2=out
 
-all:
-	if [ -d "./out" ]; then compilecommon compileclient compileserver compiletest; else echo "Please create 'out' folder"
+all: begin compilecommon compileserver compileclient compiletest
 
+begin:
+	if test -d out;	then echo "'out' exists"; else mkdir out ; fi
 
 compilecommon: $(COMMON)/*.java
 	javac $(COMMON)/*.java -d $(OUT)
