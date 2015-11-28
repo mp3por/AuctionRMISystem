@@ -1,1 +1,3 @@
 # AuctionRMISystem
+
+A coursework project.
